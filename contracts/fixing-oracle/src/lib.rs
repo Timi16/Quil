@@ -24,6 +24,8 @@ use quill_core::{median, slot_of};
 pub const HISTORY_LEN: usize = 6;
 /// Longest `inputs` hash string stored.
 pub const MAX_INPUTS_LEN: usize = 128;
+/// Most hourly slots one `fixings_between` call scans: one week.
+pub const MAX_HISTORY_SLOTS: u64 = 168;
 /// Largest execution result read from OutLayer. Its own limit is about 900 bytes.
 pub const MAX_RESULT_LEN: usize = 2048;
 
@@ -273,6 +275,20 @@ impl FixingOracle {
                 inputs: f.inputs.clone(),
                 accepted: f.accepted,
             })
+    }
+
+    /// Every stored fixing for `index` in the `hours` slots ending at `to_slot`
+    /// (inclusive), newest first. Flagged fixings are included and marked.
+    /// At most [`MAX_HISTORY_SLOTS`] slots are scanned per call.
+    pub fn fixings_between(&self, index: String, to_slot: u64, hours: u64) -> Vec<FixingView> {
+        let span = hours.min(MAX_HISTORY_SLOTS);
+        if span == 0 {
+            return Vec::new();
+        }
+        (to_slot.saturating_sub(span - 1)..=to_slot)
+            .rev()
+            .filter_map(|slot| self.fixing_at(index.clone(), slot))
+            .collect()
     }
 
     /// The program this oracle runs. It cannot be changed.

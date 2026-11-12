@@ -345,3 +345,24 @@ fn a_thin_window_falls_back_after_the_grace_period() {
         SettlementView::Fallback(U128(3_000_000))
     );
 }
+
+#[test]
+fn history_is_newest_first_and_bounded() {
+    let mut o = setup();
+    for i in 0..5u64 {
+        fix(&mut o, NOW + i, 3_000_000 + i * 1_000);
+    }
+    at("anyone.testnet", NOW + 10);
+    let all = o.fixings_between("H100".into(), NOW + 10, 48);
+    assert_eq!(
+        all.iter().map(|f| f.slot).collect::<Vec<_>>(),
+        [NOW + 4, NOW + 3, NOW + 2, NOW + 1, NOW]
+    );
+    // The window counts hours back from `to_slot`, inclusive.
+    assert_eq!(o.fixings_between("H100".into(), NOW + 4, 2).len(), 2);
+    assert!(o.fixings_between("H100".into(), NOW + 4, 0).is_empty());
+    assert!(o.fixings_between("NOPE".into(), NOW + 4, 48).is_empty());
+    // A huge span is capped at one week, and slot 0 does not underflow.
+    assert_eq!(o.fixings_between("H100".into(), NOW + 4, u64::MAX).len(), 5);
+    assert!(o.fixings_between("H100".into(), 3, 48).is_empty());
+}
