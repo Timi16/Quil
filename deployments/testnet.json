@@ -1,0 +1,26 @@
+{
+  "network": "testnet",
+  "updated": "2026-11-12",
+  "accounts": {
+    "deployer_and_keeper": "quill-1112-f33adb.testnet",
+    "claim_market": "market.quill-1112-f33adb.testnet",
+    "fixing_oracle": "oracle.quill-1112-f33adb.testnet",
+    "test_usdc": "usdc.quill-1112-f33adb.testnet"
+  },
+  "status": {
+    "claim_market": "deployed; initialised with usdc = usdc.quill-1112-f33adb.testnet and oracle = oracle.quill-1112-f33adb.testnet; full-access key still present (to be deleted after the oracle goes live)",
+    "test_usdc": "deployed; NEP-141, 6 decimals, open faucet; test only",
+    "fixing_oracle": "NOT deployed yet: waits for quill-oracle.wasm to have a public https URL",
+    "outlayer": "outlayer.testnet"
+  },
+  "code_sha256": "see deploy/wasm/SHA256SUMS",
+  "markets": [
+    { "id": 0, "index": "H100", "floor": "1.50", "cap": "5.00", "expiry_slot": 498505, "expires": "2026-11-14T01:00:00Z" }
+  ],
+  "evidence": {
+    "outlayer_round_trip_spike": "82p4vXQyg4jK6PRnsL6SLtCpDF7q82TAoLP9mKj1SrPA",
+    "mint_350_tusdc": "9fBssvtcuMS5KKXXmYtWKcA7cnjteFqu9zAA6mhi2Lg8",
+    "redeem_20_pairs": "WBQM9PiW1iEcDuHJfqDXWBMYE4rRaA12u4SV8C6ktca",
+    "bad_mint_refunded": "7MfdzazffsSraBkb3CT4LwW4qMQt1x6vBFpMkDQwZ99M"
+  }
+}
