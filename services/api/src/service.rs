@@ -268,17 +268,8 @@ pub fn market(
     id: u32,
     now_slot: u64,
 ) -> Result<Market, ApiError> {
-    let raw = chain
-        .view(
-            &contracts.claim_market,
-            "get_market",
-            json!({ "market_id": id }),
-        )
-        .map_err(ApiError::Upstream)?;
-    if raw.is_null() {
-        return Err(ApiError::NotFound(format!("no market {id}")));
-    }
-    let (market, _) = describe(chain, contracts, parse(raw, "market")?, now_slot)?;
+    let raw = get_market(chain, contracts, id)?;
+    let (market, _) = describe(chain, contracts, raw, now_slot, &mut Prices::default())?;
     Ok(market)
 }
 
@@ -287,17 +278,14 @@ pub fn markets(
     contracts: &Contracts,
     now_slot: u64,
 ) -> Result<Vec<Market>, ApiError> {
-    let count = chain
-        .view(&contracts.claim_market, "market_count", json!({}))
-        .map_err(ApiError::Upstream)?;
-    let count = count
-        .as_u64()
-        .ok_or_else(|| ApiError::Upstream("market_count is not a number".into()))?;
+    let mut prices = Prices::default();
     // Newest first; a bounded page keeps one request from walking an unbounded list.
-    (0..count as u32)
-        .rev()
-        .take(100)
-        .map(|id| market(chain, contracts, id, now_slot))
+    page(chain, contracts)?
+        .into_iter()
+        .map(|id| {
+            let raw = get_market(chain, contracts, id)?;
+            Ok(describe(chain, contracts, raw, now_slot, &mut prices)?.0)
+        })
         .collect()
 }
 
@@ -312,34 +300,41 @@ pub fn portfolio(
             "`{account}` is not a NEAR account id"
         )));
     }
-    let count = chain
-        .view(&contracts.claim_market, "market_count", json!({}))
+    let ids = page(chain, contracts)?;
+    if ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    // Every LONG and SHORT balance in one NEP-245 call instead of two calls per market.
+    let token_ids: Vec<String> = ids
+        .iter()
+        .flat_map(|id| [format!("{id}:L"), format!("{id}:S")])
+        .collect();
+    let raw = chain
+        .view(
+            &contracts.claim_market,
+            "mt_batch_balance_of",
+            json!({ "account_id": account, "token_ids": token_ids }),
+        )
         .map_err(ApiError::Upstream)?;
-    let count = count
-        .as_u64()
-        .ok_or_else(|| ApiError::Upstream("market_count is not a number".into()))?;
+    let balances: Vec<String> = parse(raw, "balances")?;
+    if balances.len() != token_ids.len() {
+        return Err(ApiError::Upstream(format!(
+            "asked for {} balances, got {}",
+            token_ids.len(),
+            balances.len()
+        )));
+    }
 
+    let mut prices = Prices::default();
     let mut positions = Vec::new();
-    for id in (0..count as u32).rev().take(100) {
-        let balance = |side: &str| -> Result<u128, ApiError> {
-            let args = json!({ "market_id": id, "side": side, "account_id": account });
-            let raw = chain
-                .view(&contracts.claim_market, "balance_of", args)
-                .map_err(ApiError::Upstream)?;
-            amount(raw.as_str().unwrap_or(""), "balance")
-        };
-        let (long, short) = (balance("Long")?, balance("Short")?);
+    let (pairs, _) = balances.as_chunks::<2>();
+    for (id, [long, short]) in ids.into_iter().zip(pairs) {
+        let (long, short) = (amount(long, "balance")?, amount(short, "balance")?);
         if long == 0 && short == 0 {
             continue;
         }
-        let raw = chain
-            .view(
-                &contracts.claim_market,
-                "get_market",
-                json!({ "market_id": id }),
-            )
-            .map_err(ApiError::Upstream)?;
-        let (market, pricing) = describe(chain, contracts, parse(raw, "market")?, now_slot)?;
+        let raw = get_market(chain, contracts, id)?;
+        let (market, pricing) = describe(chain, contracts, raw, now_slot, &mut prices)?;
         let worth_now = match pricing {
             Some((band, outcome)) => Some(decimal(
                 pay(&band, Side::Long, long, outcome)? + pay(&band, Side::Short, short, outcome)?,
@@ -360,6 +355,49 @@ pub fn portfolio(
         });
     }
     Ok(positions)
+}
+
+/// Most markets one request reads.
+pub const PAGE: u32 = 100;
+
+/// The newest [`PAGE`] market ids, newest first.
+fn page(chain: &dyn Chain, contracts: &Contracts) -> Result<Vec<u32>, ApiError> {
+    let count = chain
+        .view(&contracts.claim_market, "market_count", json!({}))
+        .map_err(ApiError::Upstream)?;
+    let count = count
+        .as_u64()
+        .and_then(|c| u32::try_from(c).ok())
+        .ok_or_else(|| ApiError::Upstream("market_count is not a number".into()))?;
+    Ok((0..count).rev().take(PAGE as usize).collect())
+}
+
+fn get_market(chain: &dyn Chain, contracts: &Contracts, id: u32) -> Result<RawMarket, ApiError> {
+    let raw = chain
+        .view(
+            &contracts.claim_market,
+            "get_market",
+            json!({ "market_id": id }),
+        )
+        .map_err(ApiError::Upstream)?;
+    if raw.is_null() {
+        return Err(ApiError::NotFound(format!("no market {id}")));
+    }
+    parse(raw, "market")
+}
+
+/// The latest fixing of each index, read at most once per request.
+#[derive(Default)]
+struct Prices(std::collections::HashMap<String, Option<u128>>);
+
+impl Prices {
+    fn latest(&mut self, chain: &dyn Chain, contracts: &Contracts, index: &str) -> Option<u128> {
+        *self.0.entry(index.to_string()).or_insert_with(|| {
+            latest_fixing(chain, contracts, index)
+                .ok()
+                .map(|fixing| amount_of_decimal(&fixing.value))
+        })
+    }
 }
 
 // ----- internals -----
@@ -385,6 +423,7 @@ fn describe(
     contracts: &Contracts,
     raw: RawMarket,
     now_slot: u64,
+    prices: &mut Prices,
 ) -> Result<(Market, Option<(Band, Outcome)>), ApiError> {
     let (floor, cap) = (amount(&raw.floor, "floor")?, amount(&raw.cap, "cap")?);
     let band = Band::new(floor, cap)
@@ -406,9 +445,9 @@ fn describe(
         // An open market is priced at the latest fixing, if the oracle has one.
         // The market itself comes from claim-market. If the oracle cannot be read
         // (not deployed yet, or down), show the market without a price rather than not at all.
-        let latest = latest_fixing(chain, contracts, &raw.index)
-            .ok()
-            .map(|fixing| Outcome::Settled(amount_of_decimal(&fixing.value)));
+        let latest = prices
+            .latest(chain, contracts, &raw.index)
+            .map(Outcome::Settled);
         (status, latest)
     };
 

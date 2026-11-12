@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex};
 use base64::Engine;
 use quill_api::chain::{decode_tx, Chain};
 use quill_api::feed::Ledger;
-use quill_api::intents::OneClick;
+use quill_api::intents::{OneClick, OneClickError};
 use quill_api::service::Contracts;
 use quill_api::{app, AppState, Config};
 use quill_oracle::Fetch;
@@ -52,16 +52,16 @@ impl Chain for FakeChain {
 /// Nothing from 1Click is needed by these tests except a broken quote body.
 struct NoOneClick;
 impl OneClick for NoOneClick {
-    fn tokens(&self) -> Result<Value, String> {
+    fn tokens(&self) -> Result<Value, OneClickError> {
         Ok(
             json!([{ "assetId": "nep141:wrap.near", "symbol": "wNEAR", "blockchain": "near", "decimals": 24 }]),
         )
     }
-    fn quote(&self, _request: &Value) -> Result<Value, String> {
-        Err("not in this test".into())
+    fn quote(&self, _request: &Value) -> Result<Value, OneClickError> {
+        Err(OneClickError::Unreachable("not in this test".into()))
     }
-    fn status(&self, _deposit_address: &str) -> Result<Value, String> {
-        Err("1Click answered 404: not found".into())
+    fn status(&self, _deposit_address: &str) -> Result<Value, OneClickError> {
+        Err(OneClickError::Status(404, "not found".into()))
     }
 }
 
@@ -335,4 +335,78 @@ fn an_unknown_transaction_is_none_and_other_rpc_errors_are_errors() {
         decode_tx(&found).unwrap().unwrap()["status"]["SuccessValue"],
         ""
     );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn another_site_may_call_the_feed_with_payment_headers() {
+    let base = serve(state(chain(), true), None).await;
+    let (status, headers) = tokio::task::spawn_blocking(move || {
+        let r = ureq::request("OPTIONS", &format!("{base}/v1/feed/H100"))
+            .set("origin", "https://agent.example")
+            .set("access-control-request-method", "GET")
+            .set("access-control-request-headers", "x-payment,x-payer")
+            .call()
+            .unwrap();
+        let allow = |name: &str| r.header(name).unwrap_or_default().to_ascii_lowercase();
+        (
+            r.status(),
+            [
+                allow("access-control-allow-origin"),
+                allow("access-control-allow-headers"),
+            ],
+        )
+    })
+    .await
+    .unwrap();
+    assert_eq!(status, 200);
+    assert_eq!(headers[0], "*");
+    assert!(
+        headers[1].contains("x-payment") || headers[1] == "*",
+        "{}",
+        headers[1]
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn without_a_chain_the_feed_does_not_take_payments() {
+    let unconfigured = AppState::with(
+        None,
+        Arc::new(NoSources),
+        config(true),
+        Arc::new(NoOneClick),
+        Ledger::in_memory(),
+    );
+    let base = serve(unconfigured, None).await;
+    let (status, _, _) = call(
+        "GET",
+        format!("{base}/v1/feed/H100"),
+        vec![("X-Payment", GOOD_TX), ("X-Payer", PAYER)],
+        None,
+    )
+    .await;
+    assert_eq!(status, 503);
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_payment_for_an_index_with_no_fixing_is_not_spent() {
+    let mut c = FakeChain::default();
+    c.txs
+        .insert((GOOD_TX.into(), PAYER.into()), payment("10000"));
+    let base = serve(state(Arc::new(c), true), None).await;
+    let paid = vec![("X-Payment", GOOD_TX), ("X-Payer", PAYER)];
+    let (status, _, _) = call("GET", format!("{base}/v1/feed/DOGE"), paid, None).await;
+    assert_eq!(status, 404, "nothing to sell, so nothing is charged");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn the_same_payment_sent_twice_at_once_buys_one_read() {
+    let base = serve(state(chain(), true), None).await;
+    let paid = || vec![("X-Payment", GOOD_TX), ("X-Payer", PAYER)];
+    let (a, b) = tokio::join!(
+        call("GET", format!("{base}/v1/feed/H100"), paid(), None),
+        call("GET", format!("{base}/v1/feed/H100"), paid(), None),
+    );
+    let mut statuses = [a.0, b.0];
+    statuses.sort();
+    assert_eq!(statuses, [200, 402]);
 }

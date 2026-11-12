@@ -18,6 +18,8 @@ struct FakeChain {
     down: bool,
     /// Contract whose every call fails, as an undeployed or broken contract would.
     broken: Option<&'static str>,
+    /// Every view called, as `method` + args.
+    calls: std::sync::Mutex<Vec<String>>,
 }
 
 impl FakeChain {
@@ -32,6 +34,7 @@ impl Chain for FakeChain {
         if self.down {
             return Err("rpc unreachable".into());
         }
+        self.calls.lock().unwrap().push(format!("{method}{args}"));
         if self.broken == Some(contract) {
             return Err("contract error: CodeDoesNotExist".into());
         }
@@ -58,6 +61,15 @@ fn raw_market(id: u32, expiry_slot: u64, settled_at: Option<&str>, void: bool) -
 
 fn fixing(value: &str) -> Value {
     json!({ "index": "H100", "slot": NOW - 1, "value": value, "sources": 4, "inputs": "sha256:abc", "accepted": true })
+}
+
+/// The args of the one NEP-245 call a portfolio makes.
+fn batch(account: &str, markets: &[u32]) -> Value {
+    let ids: Vec<String> = markets
+        .iter()
+        .flat_map(|m| [format!("{m}:L"), format!("{m}:S")])
+        .collect();
+    json!({ "account_id": account, "token_ids": ids })
 }
 
 fn open_market_chain() -> FakeChain {
@@ -225,7 +237,6 @@ fn markets_are_listed_newest_first() {
 
 #[test]
 fn a_portfolio_values_each_side_and_skips_empty_markets() {
-    let balance = |market: u32, side: &str| json!({ "market_id": market, "side": side, "account_id": "alice.testnet" });
     let chain = open_market_chain()
         .with("market_count", json!({}), json!(2))
         .with(
@@ -233,11 +244,12 @@ fn a_portfolio_values_each_side_and_skips_empty_markets() {
             json!({ "market_id": 1 }),
             raw_market(1, NOW - 5, Some("3060000"), false),
         )
-        // Market 0 (open): 100 LONG only. Market 1 (settled): nothing.
-        .with("balance_of", balance(0, "Long"), json!("100000000"))
-        .with("balance_of", balance(0, "Short"), json!("0"))
-        .with("balance_of", balance(1, "Long"), json!("0"))
-        .with("balance_of", balance(1, "Short"), json!("0"));
+        // Market 0 (open): 100 LONG only. Market 1 (settled): nothing. Newest market first.
+        .with(
+            "mt_batch_balance_of",
+            batch("alice.testnet", &[1, 0]),
+            json!(["0", "0", "100000000", "0"]),
+        );
     let positions = service::portfolio(&chain, &contracts(), "alice.testnet", NOW).unwrap();
     assert_eq!(positions.len(), 1);
     let p = &positions[0];
@@ -252,7 +264,6 @@ fn a_portfolio_values_each_side_and_skips_empty_markets() {
 
 #[test]
 fn a_settled_position_is_claimable() {
-    let balance = |side: &str| json!({ "market_id": 0, "side": side, "account_id": "bob.testnet" });
     let chain = FakeChain::default()
         .with("market_count", json!({}), json!(1))
         .with(
@@ -260,8 +271,11 @@ fn a_settled_position_is_claimable() {
             json!({ "market_id": 0 }),
             raw_market(0, NOW - 5, Some("3060000"), false),
         )
-        .with("balance_of", balance("Long"), json!("0"))
-        .with("balance_of", balance("Short"), json!("100000000"));
+        .with(
+            "mt_batch_balance_of",
+            batch("bob.testnet", &[0]),
+            json!(["0", "100000000"]),
+        );
     let p = &service::portfolio(&chain, &contracts(), "bob.testnet", NOW).unwrap()[0];
     assert_eq!(
         (p.status, p.worth_now.as_deref(), p.claimable),
@@ -409,4 +423,78 @@ fn a_missing_oracle_hides_the_price_not_the_market() {
         service::latest_fixing(&chain, &contracts(), "H100"),
         Err(ApiError::Upstream(_))
     ));
+}
+
+#[test]
+fn many_markets_on_one_index_read_its_price_once() {
+    let mut chain = open_market_chain().with("market_count", json!({}), json!(3));
+    for id in 1..3 {
+        chain = chain.with(
+            "get_market",
+            json!({ "market_id": id }),
+            raw_market(id, NOW + 20, None, false),
+        );
+    }
+    let markets = service::markets(&chain, &contracts(), NOW).unwrap();
+    assert_eq!(markets.len(), 3);
+    assert!(markets
+        .iter()
+        .all(|m| m.index_value.as_deref() == Some("3.060000")));
+    let latest_reads = chain
+        .calls
+        .lock()
+        .unwrap()
+        .iter()
+        .filter(|c| c.starts_with("latest"))
+        .count();
+    assert_eq!(latest_reads, 1);
+}
+
+#[test]
+fn a_portfolio_reads_every_balance_in_one_call() {
+    let chain = open_market_chain().with(
+        "mt_batch_balance_of",
+        batch("alice.testnet", &[0]),
+        json!(["100000000", "0"]),
+    );
+    service::portfolio(&chain, &contracts(), "alice.testnet", NOW).unwrap();
+    let calls = chain.calls.lock().unwrap();
+    assert_eq!(calls.iter().filter(|c| c.contains("balance")).count(), 1);
+}
+
+#[test]
+fn a_balance_answer_of_the_wrong_length_is_an_upstream_error() {
+    let chain = open_market_chain().with(
+        "mt_batch_balance_of",
+        batch("alice.testnet", &[0]),
+        json!(["100000000"]),
+    );
+    assert!(matches!(
+        service::portfolio(&chain, &contracts(), "alice.testnet", NOW),
+        Err(ApiError::Upstream(_))
+    ));
+    let garbage = open_market_chain().with(
+        "mt_batch_balance_of",
+        batch("alice.testnet", &[0]),
+        json!(["lots", "0"]),
+    );
+    assert!(matches!(
+        service::portfolio(&garbage, &contracts(), "alice.testnet", NOW),
+        Err(ApiError::Upstream(_))
+    ));
+}
+
+#[test]
+fn an_account_with_no_markets_has_an_empty_portfolio() {
+    let chain = FakeChain::default().with("market_count", json!({}), json!(0));
+    assert_eq!(
+        service::portfolio(&chain, &contracts(), "alice.testnet", NOW),
+        Ok(vec![])
+    );
+    assert!(chain
+        .calls
+        .lock()
+        .unwrap()
+        .iter()
+        .all(|c| !c.contains("balance")));
 }

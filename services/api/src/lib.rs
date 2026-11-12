@@ -39,6 +39,7 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::Serialize;
 use serde_json::{json, Value};
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::{ServeDir, ServeFile};
 
 use chain::Chain;
@@ -112,7 +113,7 @@ impl AppState {
             chain,
             fetch,
             Config::default(),
-            Arc::new(intents::HttpOneClick { jwt: None }),
+            Arc::new(intents::HttpOneClick::new(None)),
             Ledger::in_memory(),
         )
     }
@@ -160,9 +161,18 @@ fn routes() -> Router<Arc<AppState>> {
         .route("/v1/feed/{index}", get(paid_feed))
 }
 
+/// Any origin may read the API and buy from the feed: the data is public and
+/// there is nothing a cross-site request could abuse (no cookies, no keys).
+fn cors() -> CorsLayer {
+    CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods([axum::http::Method::GET, axum::http::Method::POST])
+        .allow_headers(Any)
+}
+
 /// The API alone.
 pub fn router(state: Arc<AppState>) -> Router {
-    routes().fallback(not_found).with_state(state)
+    routes().fallback(not_found).layer(cors()).with_state(state)
 }
 
 /// The API plus the web app's static files from `app_dir` at `/`. Unknown
@@ -174,6 +184,7 @@ pub fn app(state: Arc<AppState>, app_dir: Option<PathBuf>) -> Router {
             routes()
                 .route("/v1/{*rest}", get(not_found).post(not_found))
                 .fallback_service(ServeDir::new(dir).not_found_service(ServeFile::new(index)))
+                .layer(cors())
                 .with_state(state)
         }
         None => router(state),

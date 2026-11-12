@@ -83,9 +83,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         None => eprintln!("app: none (set APP_DIR)"),
     }
 
-    let oneclick = Arc::new(HttpOneClick {
-        jwt: env("ONECLICK_JWT"),
-    });
+    let oneclick = Arc::new(HttpOneClick::new(env("ONECLICK_JWT")));
     let app = app(
         AppState::with(chain, Arc::new(Http), config, oneclick, ledger),
         app_dir,

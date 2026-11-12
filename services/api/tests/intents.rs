@@ -2,7 +2,9 @@
 
 use std::sync::Mutex;
 
-use quill_api::intents::{iso8601, quote, status, tokens, OneClick, QuoteRequest, NEAR_USDC};
+use quill_api::intents::{
+    iso8601, quote, status, tokens, OneClick, OneClickError, QuoteRequest, NEAR_USDC,
+};
 use quill_api::service::ApiError;
 use serde_json::{json, Value};
 
@@ -15,20 +17,20 @@ type Change = Box<dyn Fn(&mut QuoteRequest)>;
 #[derive(Default)]
 struct FakeOneClick {
     tokens: Value,
-    quote: Option<Result<Value, String>>,
-    status: Option<Result<Value, String>>,
+    quote: Option<Result<Value, OneClickError>>,
+    status: Option<Result<Value, OneClickError>>,
     sent: Mutex<Option<Value>>,
 }
 
 impl OneClick for FakeOneClick {
-    fn tokens(&self) -> Result<Value, String> {
+    fn tokens(&self) -> Result<Value, OneClickError> {
         Ok(self.tokens.clone())
     }
-    fn quote(&self, request: &Value) -> Result<Value, String> {
+    fn quote(&self, request: &Value) -> Result<Value, OneClickError> {
         *self.sent.lock().unwrap() = Some(request.clone());
         self.quote.clone().expect("no quote prepared")
     }
-    fn status(&self, _deposit_address: &str) -> Result<Value, String> {
+    fn status(&self, _deposit_address: &str) -> Result<Value, OneClickError> {
         self.status.clone().expect("no status prepared")
     }
 }
@@ -173,13 +175,63 @@ fn bad_quote_requests_are_refused_before_1click_is_asked() {
 #[test]
 fn a_1click_failure_is_an_upstream_error_with_its_message() {
     let fake = FakeOneClick {
-        quote: Some(Err(
-            "1Click answered 400: Amount is too low for bridge".into()
-        )),
+        quote: Some(Err(OneClickError::Status(
+            400,
+            "Amount is too low for bridge".into(),
+        ))),
         ..Default::default()
     };
     match quote(&fake, &request(true), NOW) {
-        Err(ApiError::Upstream(why)) => assert!(why.contains("too low")),
+        Err(ApiError::Upstream(why)) => {
+            assert_eq!(why, "1Click answered 400: Amount is too low for bridge")
+        }
+        other => panic!("{other:?}"),
+    }
+}
+
+#[test]
+fn only_a_404_means_an_unknown_deposit_address() {
+    for (error, not_found) in [
+        (OneClickError::Status(404, "nope".into()), true),
+        (OneClickError::Status(500, "nope".into()), false),
+        (OneClickError::Unreachable("timed out".into()), false),
+    ] {
+        let fake = FakeOneClick {
+            status: Some(Err(error.clone())),
+            ..Default::default()
+        };
+        let result = status(&fake, "0xDepositAddress0001");
+        assert_eq!(
+            matches!(result, Err(ApiError::NotFound(_))),
+            not_found,
+            "{error}"
+        );
+        assert!(result.is_err());
+    }
+}
+
+#[test]
+fn a_status_without_a_status_field_is_an_upstream_error() {
+    let fake = FakeOneClick {
+        status: Some(Ok(json!({ "swapDetails": {} }))),
+        ..Default::default()
+    };
+    assert!(matches!(
+        status(&fake, "0xDepositAddress0001"),
+        Err(ApiError::Upstream(_))
+    ));
+}
+
+#[test]
+fn a_quote_answer_missing_a_field_is_an_upstream_error() {
+    let mut partial = answer(None);
+    partial["quote"].as_object_mut().unwrap().remove("amountIn");
+    let fake = FakeOneClick {
+        quote: Some(Ok(partial)),
+        ..Default::default()
+    };
+    match quote(&fake, &request(true), NOW) {
+        Err(ApiError::Upstream(why)) => assert!(why.contains("amountIn")),
         other => panic!("{other:?}"),
     }
 }
@@ -212,7 +264,10 @@ fn status_collects_every_transaction_hash_once() {
 #[test]
 fn an_unknown_deposit_address_is_404_and_a_bad_one_400() {
     let fake = FakeOneClick {
-        status: Some(Err("1Click answered 404: Deposit address not found".into())),
+        status: Some(Err(OneClickError::Status(
+            404,
+            "Deposit address not found".into(),
+        ))),
         ..Default::default()
     };
     assert!(matches!(

@@ -23,68 +23,93 @@ pub const SLIPPAGE_BPS: u32 = 100;
 /// How long a real quote's deposit address stays valid.
 pub const QUOTE_TTL_SECS: u64 = 30 * 60;
 
+/// Why 1Click did not answer.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum OneClickError {
+    /// It answered with an HTTP error status and this message.
+    Status(u16, String),
+    /// It could not be reached, or sent something that is not JSON.
+    Unreachable(String),
+}
+
+impl std::fmt::Display for OneClickError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Status(code, message) => write!(f, "1Click answered {code}: {message}"),
+            Self::Unreachable(why) => write!(f, "1Click unreachable: {why}"),
+        }
+    }
+}
+
+impl From<OneClickError> for ApiError {
+    fn from(e: OneClickError) -> Self {
+        ApiError::Upstream(e.to_string())
+    }
+}
+
 /// The three 1Click calls Quill uses.
 pub trait OneClick: Send + Sync {
-    fn tokens(&self) -> Result<Value, String>;
-    fn quote(&self, request: &Value) -> Result<Value, String>;
-    fn status(&self, deposit_address: &str) -> Result<Value, String>;
+    fn tokens(&self) -> Result<Value, OneClickError>;
+    fn quote(&self, request: &Value) -> Result<Value, OneClickError>;
+    fn status(&self, deposit_address: &str) -> Result<Value, OneClickError>;
 }
 
 /// The real 1Click API. A JWT is optional; without one 1Click adds a 0.2% fee.
 pub struct HttpOneClick {
-    pub jwt: Option<String>,
+    jwt: Option<String>,
+    /// One agent for every call, so connections are reused.
+    agent: ureq::Agent,
 }
 
 impl HttpOneClick {
-    fn agent() -> ureq::Agent {
-        ureq::AgentBuilder::new()
-            .timeout(Duration::from_secs(45))
-            .build()
+    pub fn new(jwt: Option<String>) -> Self {
+        Self {
+            jwt,
+            // EXACT_OUTPUT quotes can take tens of seconds.
+            agent: ureq::AgentBuilder::new()
+                .timeout(Duration::from_secs(60))
+                .build(),
+        }
     }
 
-    fn auth(&self, request: ureq::Request) -> ureq::Request {
+    fn request(&self, method: &str, path: &str) -> ureq::Request {
+        let request = self.agent.request(method, &format!("{ONECLICK_URL}{path}"));
         match &self.jwt {
             Some(jwt) => request.set("authorization", &format!("Bearer {jwt}")),
             None => request,
         }
     }
 
-    fn read(response: Result<ureq::Response, ureq::Error>) -> Result<Value, String> {
+    fn read(response: Result<ureq::Response, ureq::Error>) -> Result<Value, OneClickError> {
         match response {
             Ok(r) => r
                 .into_json()
-                .map_err(|e| format!("1Click sent invalid JSON: {e}")),
+                .map_err(|e| OneClickError::Unreachable(format!("invalid JSON: {e}"))),
             Err(ureq::Error::Status(code, r)) => {
                 let body: Value = r.into_json().unwrap_or(Value::Null);
                 let message = body["message"]
                     .as_str()
                     .map(str::to_string)
                     .unwrap_or_else(|| body.to_string());
-                Err(format!("1Click answered {code}: {message}"))
+                Err(OneClickError::Status(code, message))
             }
-            Err(e) => Err(format!("1Click unreachable: {e}")),
+            Err(e) => Err(OneClickError::Unreachable(e.to_string())),
         }
     }
 }
 
 impl OneClick for HttpOneClick {
-    fn tokens(&self) -> Result<Value, String> {
-        Self::read(
-            self.auth(Self::agent().get(&format!("{ONECLICK_URL}/v0/tokens")))
-                .call(),
-        )
+    fn tokens(&self) -> Result<Value, OneClickError> {
+        Self::read(self.request("GET", "/v0/tokens").call())
     }
 
-    fn quote(&self, request: &Value) -> Result<Value, String> {
-        Self::read(
-            self.auth(Self::agent().post(&format!("{ONECLICK_URL}/v0/quote")))
-                .send_json(request.clone()),
-        )
+    fn quote(&self, request: &Value) -> Result<Value, OneClickError> {
+        Self::read(self.request("POST", "/v0/quote").send_json(request))
     }
 
-    fn status(&self, deposit_address: &str) -> Result<Value, String> {
+    fn status(&self, deposit_address: &str) -> Result<Value, OneClickError> {
         Self::read(
-            self.auth(Self::agent().get(&format!("{ONECLICK_URL}/v0/status")))
+            self.request("GET", "/v0/status")
                 .query("depositAddress", deposit_address)
                 .call(),
         )
@@ -103,7 +128,7 @@ pub struct RouteToken {
 
 /// Every token 1Click can route from, sorted by symbol then chain.
 pub fn tokens(oneclick: &dyn OneClick) -> Result<Vec<RouteToken>, ApiError> {
-    let raw = oneclick.tokens().map_err(ApiError::Upstream)?;
+    let raw = oneclick.tokens()?;
     let list = raw
         .as_array()
         .ok_or_else(|| ApiError::Upstream("1Click token list is not a list".into()))?;
@@ -204,7 +229,7 @@ pub fn quote(
         "recipientType": "DESTINATION_CHAIN",
         "deadline": deadline,
     });
-    let answer = oneclick.quote(&body).map_err(ApiError::Upstream)?;
+    let answer = oneclick.quote(&body)?;
     let q = &answer["quote"];
     let text = |field: &str| -> Result<String, ApiError> {
         q[field]
@@ -240,14 +265,11 @@ pub fn status(oneclick: &dyn OneClick, deposit_address: &str) -> Result<Status, 
     if !plausible_address(deposit_address) {
         return Err(ApiError::BadRequest("not a deposit address".into()));
     }
-    let raw = oneclick.status(deposit_address).map_err(|e| {
-        if e.contains(" 404:") {
-            ApiError::NotFound(format!(
-                "1Click does not know deposit address {deposit_address}"
-            ))
-        } else {
-            ApiError::Upstream(e)
-        }
+    let raw = oneclick.status(deposit_address).map_err(|e| match e {
+        OneClickError::Status(404, _) => ApiError::NotFound(format!(
+            "1Click does not know deposit address {deposit_address}"
+        )),
+        e => e.into(),
     })?;
     let status = raw["status"]
         .as_str()

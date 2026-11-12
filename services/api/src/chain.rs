@@ -21,19 +21,24 @@ pub trait Chain: Send + Sync {
 /// A NEAR JSON-RPC endpoint.
 pub struct Rpc {
     url: String,
+    /// One agent for every call, so connections are reused.
+    agent: ureq::Agent,
 }
 
 impl Rpc {
     pub fn new(url: impl Into<String>) -> Self {
-        Self { url: url.into() }
+        Self {
+            url: url.into(),
+            agent: ureq::AgentBuilder::new()
+                .timeout(Duration::from_secs(10))
+                .build(),
+        }
     }
 }
 
 impl Rpc {
     fn post(&self, request: Value) -> Result<Value, String> {
-        ureq::AgentBuilder::new()
-            .timeout(Duration::from_secs(10))
-            .build()
+        self.agent
             .post(&self.url)
             .send_json(request)
             .map_err(|e| format!("rpc unreachable: {e}"))?
