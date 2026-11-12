@@ -6,6 +6,7 @@ members = [
     "contracts/fixing-oracle",
     "contracts/mock-usdc",
     "oracle",
+    "demo",
 ]
 
 [workspace.package]
@@ -17,6 +18,8 @@ repository = "https://github.com/[YOUR-ORG]/quill"
 [workspace.dependencies]
 quill-core = { path = "crates/quill-core" }
 near-sdk = "5"
+claim-market = { path = "contracts/claim-market" }
+fixing-oracle = { path = "contracts/fixing-oracle" }
 
 # Contracts are money-holding code: keep overflow checks on in release builds.
 [profile.release]
