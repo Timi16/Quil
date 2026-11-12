@@ -1,0 +1,13 @@
+[package]
+name = "quill-keeper"
+description = "Permissionless helper: asks the oracle for each hour's fixing and settles expired markets. Anyone can run one."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+near-api = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "signal"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
