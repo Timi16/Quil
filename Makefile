@@ -49,8 +49,8 @@ keeper:      ## run the keeper against testnet, signing as the account in .env.t
 keeper-once: ## one keeper tick, then exit
 	ONCE=1 KEEPER_ACCOUNT=$(TESTNET_ACCOUNT) $(CHAIN_ENV) cargo run --quiet -p quill-keeper
 
-api-testnet: ## the read API against the testnet contracts
-	$(CHAIN_ENV) cargo run --quiet -p quill-api
+api-testnet: ## the API + web app on http://localhost:8080 against the testnet contracts, paid feed on
+	$(CHAIN_ENV) USDC_ID=usdc.$(TESTNET_ACCOUNT) FEED_PAYEE=$(TESTNET_ACCOUNT) cargo run --quiet -p quill-api
 
 publish-oracle: ## PUBLIC: push main and release quill-oracle.wasm on GitHub (run this yourself)
 	./scripts/publish-oracle.sh

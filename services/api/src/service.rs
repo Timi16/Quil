@@ -28,6 +28,8 @@ pub enum ApiError {
     BadRequest(String),
     /// NEAR or a price source failed.
     Upstream(String),
+    /// A feature that needs configuration the server does not have.
+    Unavailable(String),
 }
 
 /// Micro-units as an exact decimal string: `3060000` is `"3.060000"`.
@@ -170,16 +172,41 @@ pub fn live_index(fetch: &dyn Fetch, slot: u64, indexes: &[&str]) -> LiveIndex {
     }
 }
 
+/// Most hours of history one request may ask for (the oracle's own bound).
+pub const MAX_HISTORY_HOURS: u64 = 168;
+
+fn check_index(index: &str) -> Result<(), ApiError> {
+    if index.is_empty()
+        || index.len() > 32
+        || !index
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b == b'_')
+    {
+        return Err(ApiError::BadRequest(
+            "index id must be 1 to 32 letters, digits or underscores".into(),
+        ));
+    }
+    Ok(())
+}
+
+fn to_fixing(raw: RawFixing) -> Result<Fixing, ApiError> {
+    Ok(Fixing {
+        at: raw.slot * 3600,
+        value: decimal(amount(&raw.value, "value")?),
+        index: raw.index,
+        slot: raw.slot,
+        sources: raw.sources,
+        inputs: raw.inputs,
+        accepted: raw.accepted,
+    })
+}
+
 pub fn latest_fixing(
     chain: &dyn Chain,
     contracts: &Contracts,
     index: &str,
 ) -> Result<Fixing, ApiError> {
-    if index.is_empty() || index.len() > 32 {
-        return Err(ApiError::BadRequest(
-            "index id must be 1 to 32 characters".into(),
-        ));
-    }
+    check_index(index)?;
     let raw = chain
         .view(
             &contracts.fixing_oracle,
@@ -192,16 +219,47 @@ pub fn latest_fixing(
             "no accepted fixing for {index} yet"
         )));
     }
-    let raw: RawFixing = parse(raw, "fixing")?;
-    Ok(Fixing {
-        at: raw.slot * 3600,
-        value: decimal(amount(&raw.value, "value")?),
-        index: raw.index,
-        slot: raw.slot,
-        sources: raw.sources,
-        inputs: raw.inputs,
-        accepted: raw.accepted,
-    })
+    to_fixing(parse(raw, "fixing")?)
+}
+
+/// Every fixing (accepted and flagged) in the `hours` up to and including `to_slot`, newest first.
+pub fn fixing_history(
+    chain: &dyn Chain,
+    contracts: &Contracts,
+    index: &str,
+    to_slot: u64,
+    hours: u64,
+) -> Result<Vec<Fixing>, ApiError> {
+    check_index(index)?;
+    if hours == 0 || hours > MAX_HISTORY_HOURS {
+        return Err(ApiError::BadRequest(format!(
+            "hours must be between 1 and {MAX_HISTORY_HOURS}"
+        )));
+    }
+    let raw = chain
+        .view(
+            &contracts.fixing_oracle,
+            "fixings_between",
+            json!({ "index": index, "to_slot": to_slot, "hours": hours }),
+        )
+        .map_err(ApiError::Upstream)?;
+    let raw: Vec<RawFixing> = parse(raw, "fixing history")?;
+    raw.into_iter().map(to_fixing).collect()
+}
+
+/// The oracle program every fixing came from.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CodeRef {
+    pub wasm_url: String,
+    pub wasm_hash: String,
+    pub build_target: String,
+}
+
+pub fn code_ref(chain: &dyn Chain, contracts: &Contracts) -> Result<CodeRef, ApiError> {
+    let raw = chain
+        .view(&contracts.fixing_oracle, "code_ref", json!({}))
+        .map_err(ApiError::Upstream)?;
+    parse(raw, "code ref")
 }
 
 pub fn market(
@@ -383,9 +441,12 @@ fn describe(
 }
 
 /// NEAR account id rules, enough to reject junk before it reaches the RPC.
-fn valid_account(account: &str) -> bool {
+/// NEAR named accounts and 64-hex implicit accounts.
+pub fn valid_account(account: &str) -> bool {
     (2..=64).contains(&account.len())
         && account.bytes().all(|b| {
             b.is_ascii_lowercase() || b.is_ascii_digit() || matches!(b, b'.' | b'-' | b'_')
         })
+        && !account.starts_with(['.', '-', '_'])
+        && !account.ends_with(['.', '-', '_'])
 }
