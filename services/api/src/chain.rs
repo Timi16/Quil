@@ -3,9 +3,12 @@
 //! The API never signs anything and holds no keys. [`Chain`] is the one seam
 //! to NEAR, so the rest of the service is tested without a network.
 
+use std::collections::HashMap;
+use std::sync::Mutex;
+use std::time::{Duration, Instant};
+
 use base64::Engine;
 use serde_json::{json, Value};
-use std::time::Duration;
 
 /// Calls a contract view method and returns its JSON result.
 pub trait Chain: Send + Sync {
@@ -18,32 +21,104 @@ pub trait Chain: Send + Sync {
     }
 }
 
-/// A NEAR JSON-RPC endpoint.
+/// NEAR JSON-RPC, with fallback endpoints: a node that is down or rate
+/// limiting (HTTP 429, 5xx) is skipped for the next one. A JSON-RPC error
+/// from a working node is an answer, not a reason to ask another.
 pub struct Rpc {
-    url: String,
+    urls: Vec<String>,
     /// One agent for every call, so connections are reused.
     agent: ureq::Agent,
 }
 
 impl Rpc {
     pub fn new(url: impl Into<String>) -> Self {
+        Self::with_fallbacks(vec![url.into()])
+    }
+
+    /// Endpoints in order of preference. Panics on an empty list.
+    pub fn with_fallbacks(urls: Vec<String>) -> Self {
+        assert!(!urls.is_empty(), "at least one RPC endpoint");
         Self {
-            url: url.into(),
+            urls,
             agent: ureq::AgentBuilder::new()
                 .timeout(Duration::from_secs(10))
                 .build(),
         }
     }
+
+    fn post(&self, request: Value) -> Result<Value, String> {
+        let mut failures = Vec::new();
+        for url in &self.urls {
+            match self.agent.post(url).send_json(&request) {
+                Ok(response) => {
+                    return response
+                        .into_json()
+                        .map_err(|e| format!("rpc {url} sent invalid JSON: {e}"))
+                }
+                Err(ureq::Error::Status(code, _)) if code == 429 || code >= 500 => {
+                    failures.push(format!("{url}: status code {code}"))
+                }
+                Err(ureq::Error::Status(code, _)) => {
+                    return Err(format!("rpc {url} refused the request: status code {code}"))
+                }
+                Err(e) => failures.push(format!("{url}: {e}")),
+            }
+        }
+        Err(format!("rpc unreachable: {}", failures.join("; ")))
+    }
 }
 
-impl Rpc {
-    fn post(&self, request: Value) -> Result<Value, String> {
-        self.agent
-            .post(&self.url)
-            .send_json(request)
-            .map_err(|e| format!("rpc unreachable: {e}"))?
-            .into_json()
-            .map_err(|e| format!("rpc sent invalid JSON: {e}"))
+/// Remembers view results for a few seconds, so a page that asks for the same
+/// markets many times, or many viewers at once, costs the RPC one call.
+/// Errors are never cached, and transactions are always looked up fresh.
+pub struct Cached<C> {
+    inner: C,
+    ttl: Duration,
+    entries: Mutex<HashMap<String, (Instant, Value)>>,
+}
+
+/// Most view results kept at once; the cache is emptied when it fills.
+pub const CACHE_ENTRIES: usize = 4096;
+
+impl<C: Chain> Cached<C> {
+    pub fn new(inner: C, ttl: Duration) -> Self {
+        Self {
+            inner,
+            ttl,
+            entries: Mutex::new(HashMap::new()),
+        }
+    }
+
+    pub fn inner(&self) -> &C {
+        &self.inner
+    }
+}
+
+impl<C: Chain> Chain for Cached<C> {
+    fn view(&self, contract: &str, method: &str, args: Value) -> Result<Value, String> {
+        let key = format!("{contract}\u{0}{method}\u{0}{args}");
+        let now = Instant::now();
+        if let Some((at, value)) = self
+            .entries
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .get(&key)
+        {
+            if now.duration_since(*at) < self.ttl {
+                return Ok(value.clone());
+            }
+        }
+        let value = self.inner.view(contract, method, args)?;
+        let mut entries = self.entries.lock().unwrap_or_else(|e| e.into_inner());
+        if entries.len() >= CACHE_ENTRIES {
+            entries.clear();
+        }
+        entries.insert(key, (now, value.clone()));
+        Ok(value)
+    }
+
+    fn transaction(&self, hash: &str, sender: &str) -> Result<Option<Value>, String> {
+        self.inner.transaction(hash, sender)
     }
 }
 

@@ -1,7 +1,8 @@
 //! Starts the read API. Configuration comes from the environment:
 //!
 //! * `PORT` (default 8080)
-//! * `NEAR_RPC_URL` (default NEAR testnet)
+//! * `NEAR_RPC_URL`: comma-separated endpoints, tried in order (default FastNEAR's
+//!   testnet RPC, then NEAR's). View results are cached for 5 seconds.
 //! * `CLAIM_MARKET_ID` and `FIXING_ORACLE_ID`: the deployed contracts. Without
 //!   both, chain routes answer 503 and only the live index is served.
 //! * `USDC_ID`: the collateral token contract (shown to the app, and the token
@@ -16,13 +17,19 @@
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 
-use quill_api::chain::{Chain, Rpc};
+use quill_api::chain::{Cached, Chain, Rpc};
 use quill_api::feed::Ledger;
 use quill_api::intents::HttpOneClick;
 use quill_api::service::Contracts;
 use quill_api::{app, AppState, Config};
 use quill_oracle::fetch::Http;
+
+const DEFAULT_RPCS: &str = "https://test.rpc.fastnear.com,https://rpc.testnet.near.org";
+/// How long an identical view result is reused. Fixings are hourly, so a few
+/// seconds of staleness costs nothing and spares the public RPC.
+const VIEW_CACHE: Duration = Duration::from_secs(5);
 
 fn env(name: &str) -> Option<String> {
     std::env::var(name)
@@ -33,13 +40,27 @@ fn env(name: &str) -> Option<String> {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let port: u16 = env("PORT").map(|p| p.parse()).transpose()?.unwrap_or(8080);
-    let rpc = env("NEAR_RPC_URL").unwrap_or_else(|| "https://rpc.testnet.near.org".into());
+    // Comma-separated, in order of preference; later ones are used when earlier ones are down or rate limiting.
+    let rpcs: Vec<String> = env("NEAR_RPC_URL")
+        .unwrap_or_else(|| DEFAULT_RPCS.into())
+        .split(',')
+        .map(|u| u.trim().to_string())
+        .filter(|u| !u.is_empty())
+        .collect();
+    let rpc = rpcs
+        .first()
+        .cloned()
+        .ok_or("NEAR_RPC_URL names no endpoint")?;
 
     let chain = match (env("CLAIM_MARKET_ID"), env("FIXING_ORACLE_ID")) {
         (Some(claim_market), Some(fixing_oracle)) => {
-            eprintln!("chain: {claim_market} and {fixing_oracle} via {rpc}");
+            eprintln!(
+                "chain: {claim_market} and {fixing_oracle} via {}",
+                rpcs.join(", ")
+            );
             Some((
-                Arc::new(Rpc::new(rpc.clone())) as Arc<dyn Chain>,
+                Arc::new(Cached::new(Rpc::with_fallbacks(rpcs.clone()), VIEW_CACHE))
+                    as Arc<dyn Chain>,
                 Contracts {
                     claim_market,
                     fixing_oracle,
