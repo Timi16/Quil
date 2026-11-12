@@ -79,7 +79,7 @@ For each GPU index (H100, B200):
 2. Keep on-demand listings for the exact GPU model; normalise to USD per GPU-hour (divide multi-GPU offers by GPU count).
 3. Drop listings outside 0.4× to 2.5× of the previous fixing (obvious typos and bait listings).
 4. Take the **median per provider**, so a provider with 500 listings counts the same as one with 20.
-5. Require at least 3 providers with at least 5 listings each. Otherwise report "no fixing" for that index.
+5. Require at least 3 providers. Providers that list individual offers (Vast.ai, Shadeform) must have at least 5 listings to count; RunPod and Akash publish their own aggregated figures and count as given. Otherwise report "no fixing" for that index.
 6. The index is the **median of the provider medians**.
 
 For the inference index (INF-OUT): read `outputCostPerToken` for the pinned model from `cloud-api.near.ai/v1/model/list` and convert to USD per 1M tokens. It is a single first-party source, stated as such.
