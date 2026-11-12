@@ -1,5 +1,5 @@
 # Quill: common tasks. Needs Rust (rustup) on PATH.
-.PHONY: test lint fmt check demo demo-live demo-verbose wasm oracle-wasm oracle-live api keeper keeper-once api-testnet testnet-account
+.PHONY: test lint fmt check demo demo-live demo-verbose wasm oracle-wasm oracle-live api keeper keeper-once api-testnet testnet-account publish-oracle deploy-oracle
 
 test:        ## run every test in the workspace
 	cargo test --workspace
@@ -48,3 +48,9 @@ keeper-once: ## one keeper tick, then exit
 
 api-testnet: ## the read API against the testnet contracts
 	$(CHAIN_ENV) cargo run --quiet -p quill-api
+
+publish-oracle: ## PUBLIC: push main and release quill-oracle.wasm on GitHub (run this yourself)
+	./scripts/publish-oracle.sh
+
+deploy-oracle: ## deploy fixing-oracle pinned to the published program: make deploy-oracle URL=<program url>
+	./scripts/deploy-oracle.sh $(URL)
