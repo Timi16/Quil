@@ -1,0 +1,8 @@
+[package]
+name = "quill-core"
+description = "Pure, dependency-free maths for Quill: payouts, settlement windows and index aggregation."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
