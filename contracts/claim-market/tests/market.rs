@@ -173,7 +173,7 @@ fn transfer_moves_one_side_only() {
     let mut c = setup();
     mint(&mut c, &alice(), 350 * UNIT);
     at(&alice(), NOW, one_yocto());
-    c.transfer(0, Side::Short, bob(), U128(40 * UNIT));
+    c.mt_transfer(bob(), "0:S".into(), U128(40 * UNIT), None, None);
     assert_eq!(bal(&c, Side::Short, &alice()), 60 * UNIT);
     assert_eq!(bal(&c, Side::Short, &bob()), 40 * UNIT);
     assert_eq!(bal(&c, Side::Long, &alice()), 100 * UNIT);
@@ -186,7 +186,7 @@ fn cannot_transfer_more_than_you_hold() {
     let mut c = setup();
     mint(&mut c, &alice(), 350 * UNIT);
     at(&alice(), NOW, one_yocto());
-    c.transfer(0, Side::Long, bob(), U128(100 * UNIT + 1));
+    c.mt_transfer(bob(), "0:L".into(), U128(100 * UNIT + 1), None, None);
 }
 
 #[test]
@@ -195,7 +195,7 @@ fn transfer_needs_one_yocto() {
     let mut c = setup();
     mint(&mut c, &alice(), 350 * UNIT);
     at(&alice(), NOW, NearToken::from_yoctonear(0));
-    c.transfer(0, Side::Long, bob(), U128(1));
+    c.mt_transfer(bob(), "0:L".into(), U128(1), None, None);
 }
 
 // ----- redeeming pairs -----
@@ -218,7 +218,7 @@ fn redeem_needs_both_sides() {
     let mut c = setup();
     mint(&mut c, &alice(), 350 * UNIT);
     at(&alice(), NOW, one_yocto());
-    c.transfer(0, Side::Short, bob(), U128(100 * UNIT));
+    c.mt_transfer(bob(), "0:S".into(), U128(100 * UNIT), None, None);
     at(&alice(), NOW, NearToken::from_yoctonear(0));
     let _ = c.redeem_pair(0, U128(UNIT));
 }
@@ -328,7 +328,7 @@ fn the_worked_example_pays_156_and_194() {
     mint(&mut c, &alice(), 350 * UNIT);
     // Alice keeps LONG and sells all her SHORT to Bob.
     at(&alice(), NOW, one_yocto());
-    c.transfer(0, Side::Short, bob(), U128(100 * UNIT));
+    c.mt_transfer(bob(), "0:S".into(), U128(100 * UNIT), None, None);
     settle_at(&mut c, SettlementView::Final(U128(3_060_000)));
 
     at(&alice(), EXPIRY, NearToken::from_yoctonear(0));
@@ -354,7 +354,7 @@ fn a_worthless_side_is_burned_without_a_transfer() {
     let mut c = setup();
     mint(&mut c, &alice(), 350 * UNIT);
     at(&alice(), NOW, one_yocto());
-    c.transfer(0, Side::Short, bob(), U128(100 * UNIT));
+    c.mt_transfer(bob(), "0:S".into(), U128(100 * UNIT), None, None);
     // Index settles above the cap: SHORT is worth nothing.
     settle_at(&mut c, SettlementView::Fallback(U128(9_000_000)));
 
@@ -376,7 +376,7 @@ fn a_void_market_pays_each_side_half() {
     let mut c = setup();
     mint(&mut c, &alice(), 350 * UNIT);
     at(&alice(), NOW, one_yocto());
-    c.transfer(0, Side::Short, bob(), U128(100 * UNIT));
+    c.mt_transfer(bob(), "0:S".into(), U128(100 * UNIT), None, None);
     settle_at(&mut c, SettlementView::Void);
     assert!(c.get_market(0).unwrap().void);
 
@@ -457,7 +457,17 @@ fn locked_collateral_always_covers_every_claim() {
                     let to = &people[next(4) as usize];
                     if have > 0 && to != who {
                         at(who, NOW, one_yocto());
-                        c.transfer(0, side, to.clone(), U128(1 + next(have as u64)));
+                        let amount = 1 + next(have as u64);
+                        // Opening a new holding needs at least 0.01 unit.
+                        if bal(&c, side, to) > 0 || amount >= claim_market::mt::MIN_NEW_HOLDING {
+                            c.mt_transfer(
+                                to.clone(),
+                                claim_market::mt::token_id(0, side),
+                                U128(amount),
+                                None,
+                                None,
+                            );
+                        }
                     }
                 }
                 _ => {

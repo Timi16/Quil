@@ -4,9 +4,8 @@
 //! paths: `redeem_pair` and `claim`. There is no owner, no admin method and no
 //! way to change a market after it is created.
 //!
-//! LONG and SHORT balances are kept in an internal ledger and moved with
-//! `transfer`. (Wrapping them as NEP-141 tokens is a follow-up; the collateral
-//! logic does not change.)
+//! LONG and SHORT are NEP-245 multi-tokens (see [`mt`]): token ids `"<market>:L"`
+//! and `"<market>:S"`, moved with `mt_transfer` and `mt_transfer_call`.
 //!
 //! Known limit: the contract pays for its own balance storage. A production
 //! deployment should add NEP-145 storage deposits.
@@ -15,11 +14,14 @@ use near_sdk::json_types::U128;
 use near_sdk::serde_json::{self, json};
 use near_sdk::store::{LookupMap, Vector};
 use near_sdk::{
-    assert_one_yocto, env, ext_contract, near, require, AccountId, Gas, NearToken, PanicOnDefault,
-    Promise, PromiseError, PromiseOrValue,
+    env, ext_contract, near, require, AccountId, Gas, NearToken, PanicOnDefault, Promise,
+    PromiseError, PromiseOrValue,
 };
 use quill_core::payout::{Band, Outcome, Side as CoreSide};
 use quill_core::{slot_of, UNIT};
+
+pub mod mt;
+use mt::{nep245, token_id};
 
 /// Smallest mint: 0.01 of a unit. Stops dust positions that cost more to store than they hold.
 pub const MIN_MINT_UNITS: u128 = UNIT / 100;
@@ -42,7 +44,7 @@ pub enum Side {
 }
 
 impl Side {
-    fn key(self) -> &'static str {
+    pub(crate) fn key(self) -> &'static str {
         match self {
             Side::Long => "L",
             Side::Short => "S",
@@ -248,30 +250,19 @@ impl ClaimMarket {
         market.locked += cost;
         self.save_market(market_id, market);
 
+        let ids = [
+            token_id(market_id, Side::Long),
+            token_id(market_id, Side::Short),
+        ];
+        nep245(
+            "mt_mint",
+            json!({ "owner_id": sender_id, "token_ids": ids, "amounts": [U128(units), U128(units)] }),
+        );
         emit(
             "minted",
             json!({ "market": market_id, "account": sender_id, "units": U128(units), "locked": U128(cost) }),
         );
         PromiseOrValue::Value(U128(amount.0 - cost))
-    }
-
-    // ----- moving claims -----
-
-    /// Send LONG or SHORT to another account.
-    #[payable]
-    pub fn transfer(&mut self, market_id: u32, side: Side, receiver_id: AccountId, units: U128) {
-        assert_one_yocto();
-        let sender = env::predecessor_account_id();
-        require!(sender != receiver_id, "Sender and receiver must differ");
-        require!(units.0 > 0, "Nothing to transfer");
-        self.market_or_panic(market_id);
-
-        self.debit(market_id, side, &sender, units.0);
-        self.credit(market_id, side, &receiver_id, units.0);
-        emit(
-            "transferred",
-            json!({ "market": market_id, "side": side, "from": sender, "to": receiver_id, "units": units }),
-        );
     }
 
     // ----- money out -----
@@ -294,6 +285,7 @@ impl ClaimMarket {
         market.locked -= amount;
         self.save_market(market_id, market);
 
+        burned(&account, market_id, units.0, units.0);
         emit(
             "redeemed",
             json!({ "market": market_id, "account": account, "units": units, "paid": U128(amount) }),
@@ -347,6 +339,7 @@ impl ClaimMarket {
         market.locked -= amount;
         self.save_market(market_id, market);
 
+        burned(&account, market_id, long, short);
         emit(
             "claimed",
             json!({ "market": market_id, "account": account, "long": U128(long), "short": U128(short), "paid": U128(amount) }),
@@ -418,6 +411,14 @@ impl ClaimMarket {
         market.short_supply += short_units.0;
         market.locked += amount.0;
         self.save_market(market_id, market);
+        let ids = [
+            token_id(market_id, Side::Long),
+            token_id(market_id, Side::Short),
+        ];
+        nep245(
+            "mt_mint",
+            json!({ "owner_id": account, "token_ids": ids, "amounts": [long_units, short_units], "memo": "payout failed: restored" }),
+        );
         emit(
             "payout_reverted",
             json!({ "market": market_id, "account": account, "amount": amount }),
@@ -484,14 +485,14 @@ impl ClaimMarket {
         format!("{market_id}:{}:{account}", side.key())
     }
 
-    fn balance(&self, market_id: u32, side: Side, account: &AccountId) -> u128 {
+    pub(crate) fn balance(&self, market_id: u32, side: Side, account: &AccountId) -> u128 {
         self.balances
             .get(&Self::balance_key(market_id, side, account))
             .copied()
             .unwrap_or(0)
     }
 
-    fn credit(&mut self, market_id: u32, side: Side, account: &AccountId, units: u128) {
+    pub(crate) fn credit(&mut self, market_id: u32, side: Side, account: &AccountId, units: u128) {
         if units == 0 {
             return;
         }
@@ -500,7 +501,7 @@ impl ClaimMarket {
         self.balances.insert(key, balance + units);
     }
 
-    fn debit(&mut self, market_id: u32, side: Side, account: &AccountId, units: u128) {
+    pub(crate) fn debit(&mut self, market_id: u32, side: Side, account: &AccountId, units: u128) {
         if units == 0 {
             return;
         }
@@ -538,6 +539,21 @@ impl ClaimMarket {
                         U128(amount),
                     ),
             )
+    }
+}
+
+/// NEP-245 `mt_burn` for whatever non-zero amounts of a market's LONG and SHORT were burned.
+fn burned(owner: &AccountId, market_id: u32, long: u128, short: u128) {
+    let (ids, amounts): (Vec<String>, Vec<U128>) = [(Side::Long, long), (Side::Short, short)]
+        .into_iter()
+        .filter(|(_, units)| *units > 0)
+        .map(|(side, units)| (token_id(market_id, side), U128(units)))
+        .unzip();
+    if !ids.is_empty() {
+        nep245(
+            "mt_burn",
+            json!({ "owner_id": owner, "token_ids": ids, "amounts": amounts }),
+        );
     }
 }
 

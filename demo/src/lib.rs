@@ -201,7 +201,13 @@ impl World {
             NearToken::from_yoctonear(1),
             vec![],
         );
-        self.market.transfer(market, side, to.clone(), U128(units));
+        self.market.mt_transfer(
+            to.clone(),
+            claim_market::mt::token_id(market, side),
+            U128(units),
+            None,
+            None,
+        );
     }
 
     /// Burn `units` of LONG and SHORT for collateral. Returns the USDC received (0 if the transfer failed).
