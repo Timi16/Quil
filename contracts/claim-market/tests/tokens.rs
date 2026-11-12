@@ -345,3 +345,137 @@ fn redeeming_and_claiming_emit_mt_burn() {
         .expect("mt_burn");
     assert!(log.contains(r#""token_ids":["0:L","0:S"]"#), "{log}");
 }
+
+// ----- more edge cases -----
+
+#[test]
+#[should_panic(expected = "Sender and receiver must differ")]
+fn sending_to_yourself_is_refused() {
+    let mut c = setup();
+    at(&alice(), yocto(), vec![]);
+    c.mt_transfer(alice(), "0:L".into(), U128(UNIT), None, None);
+}
+
+#[test]
+#[should_panic(expected = "Amounts must be positive")]
+fn a_zero_transfer_is_refused() {
+    let mut c = setup();
+    at(&alice(), yocto(), vec![]);
+    // Bob first holds some, so the dust rule is not what stops this.
+    c.mt_transfer(bob(), "0:L".into(), U128(UNIT), None, None);
+    at(&alice(), yocto(), vec![]);
+    c.mt_transfer(bob(), "0:L".into(), U128(0), None, None);
+}
+
+#[test]
+#[should_panic(expected = "Nothing to transfer")]
+fn an_empty_batch_is_refused() {
+    let mut c = setup();
+    at(&alice(), yocto(), vec![]);
+    c.mt_batch_transfer(bob(), vec![], vec![], None, None);
+}
+
+#[test]
+#[should_panic(expected = "Insufficient balance")]
+fn a_batch_cannot_spend_the_same_balance_twice() {
+    let mut c = setup();
+    at(&alice(), yocto(), vec![]);
+    // 60 + 60 LONG from a balance of 100: the second entry must fail and revert the first.
+    c.mt_batch_transfer(
+        bob(),
+        vec!["0:L".into(), "0:L".into()],
+        vec![U128(60 * UNIT), U128(60 * UNIT)],
+        None,
+        None,
+    );
+}
+
+#[test]
+fn a_batch_may_name_a_token_twice_and_a_refund_handles_each_entry() {
+    let mut c = setup();
+    at(&alice(), yocto(), vec![]);
+    let _ = c.mt_batch_transfer_call(
+        pool(),
+        vec!["0:L".into(), "0:L".into()],
+        vec![U128(30 * UNIT), U128(20 * UNIT)],
+        None,
+        None,
+        "deposit".into(),
+    );
+    assert_eq!(balance(&c, &pool(), "0:L"), 50 * UNIT);
+
+    // The pool keeps nothing of the first entry and all of the second.
+    at(
+        &acct("market.testnet"),
+        NearToken::from_yoctonear(0),
+        vec![answer(&[30 * UNIT, 0])],
+    );
+    let kept = c.mt_resolve_transfer(
+        vec![alice(), alice()],
+        pool(),
+        vec!["0:L".into(), "0:L".into()],
+        vec![U128(30 * UNIT), U128(20 * UNIT)],
+        None,
+    );
+    assert_eq!(kept, vec![U128(0), U128(20 * UNIT)]);
+    assert_eq!(
+        (balance(&c, &alice(), "0:L"), balance(&c, &pool(), "0:L")),
+        (80 * UNIT, 20 * UNIT)
+    );
+}
+
+#[test]
+fn an_answer_of_the_wrong_length_counts_as_a_full_refund() {
+    let (c, kept) = send_to_pool_and_resolve(answer(&[0, 0]), 0);
+    assert_eq!(kept, vec![U128(0)]);
+    assert_eq!(balance(&c, &alice(), "0:S"), 100 * UNIT);
+}
+
+#[test]
+fn views_answer_zero_or_none_for_anything_unknown() {
+    let c = setup();
+    assert_eq!(balance(&c, &bob(), "0:L"), 0);
+    assert_eq!(
+        balance(&c, &alice(), "7:L"),
+        0,
+        "a market that does not exist"
+    );
+    assert_eq!(balance(&c, &alice(), "nonsense"), 0);
+    assert_eq!(c.mt_supply("7:S".into()), None);
+    assert_eq!(c.mt_token(vec!["0:S".into(), "x".into()])[1], None);
+    assert_eq!(
+        c.mt_batch_balance_of(alice(), vec!["0:L".into(), "0:S".into(), "1:L".into()]),
+        vec![U128(100 * UNIT), U128(100 * UNIT), U128(0)]
+    );
+}
+
+/// Random transfers between four accounts never create or destroy a token:
+/// the balances of each side always add up to its supply.
+#[test]
+fn transfers_never_change_supply() {
+    let mut seed = 0x5EED_u64;
+    let mut next = |n: u128| {
+        seed = seed
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
+        u128::from(seed >> 33) % n
+    };
+    let people = [alice(), bob(), pool(), acct("carol.testnet")];
+    let mut c = setup();
+    for _ in 0..300 {
+        let from = &people[next(4) as usize];
+        let to = &people[next(4) as usize];
+        let id = if next(2) == 0 { "0:L" } else { "0:S" };
+        let have = balance(&c, from, id);
+        if from == to || have < MIN_NEW_HOLDING {
+            continue;
+        }
+        let amount = MIN_NEW_HOLDING + next(have - MIN_NEW_HOLDING + 1);
+        at(from, yocto(), vec![]);
+        c.mt_transfer(to.clone(), id.into(), U128(amount), None, None);
+        for id in ["0:L", "0:S"] {
+            let total: u128 = people.iter().map(|p| balance(&c, p, id)).sum();
+            assert_eq!(Some(U128(total)), c.mt_supply(id.into()), "{id}");
+        }
+    }
+}
