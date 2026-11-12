@@ -1,0 +1,48 @@
+{
+ "data": {
+  "gpuTypes": [
+   {
+    "id": "NVIDIA A100 80GB PCIe",
+    "displayName": "A100 PCIe",
+    "securePrice": 1.79,
+    "communityPrice": 1.19
+   },
+   {
+    "id": "NVIDIA A100-SXM4-40GB",
+    "displayName": "A100 SXM 40GB",
+    "securePrice": 0,
+    "communityPrice": 1
+   },
+   {
+    "id": "NVIDIA A100-SXM4-80GB",
+    "displayName": "A100 SXM",
+    "securePrice": 1.79,
+    "communityPrice": 1.39
+   },
+   {
+    "id": "NVIDIA B200",
+    "displayName": "B200",
+    "securePrice": 7.99,
+    "communityPrice": 5.98
+   },
+   {
+    "id": "NVIDIA H100 80GB HBM3",
+    "displayName": "H100 SXM",
+    "securePrice": 3.99,
+    "communityPrice": 2.69
+   },
+   {
+    "id": "NVIDIA H100 NVL",
+    "displayName": "H100 NVL",
+    "securePrice": 3.19,
+    "communityPrice": 2.59
+   },
+   {
+    "id": "NVIDIA H100 PCIe",
+    "displayName": "H100 PCIe",
+    "securePrice": 2.89,
+    "communityPrice": 1.99
+   }
+  ]
+ }
+}

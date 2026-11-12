@@ -1,0 +1,473 @@
+{
+ "instance_types": [
+  {
+   "cloud": "latitude",
+   "shade_instance_type": "H100",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 199
+  },
+  {
+   "cloud": "hyperstack",
+   "shade_instance_type": "H100x8_NVLINK",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 2080
+  },
+  {
+   "cloud": "voltagepark",
+   "shade_instance_type": "H100_sxm5x8",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 1592
+  },
+  {
+   "cloud": "denvr",
+   "shade_instance_type": "H100_sxm5x8",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 2000
+  },
+  {
+   "cloud": "horizon",
+   "shade_instance_type": "H100x8",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 1560
+  },
+  {
+   "cloud": "massedcompute",
+   "shade_instance_type": "H100x8",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 2182
+  },
+  {
+   "cloud": "massedcompute",
+   "shade_instance_type": "H100_sxm5x8_NVLINK",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 2512
+  },
+  {
+   "cloud": "voltagepark",
+   "shade_instance_type": "H100_sxm5x4",
+   "gpu_type": "H100",
+   "num_gpus": 4,
+   "hourly_price": 796
+  },
+  {
+   "cloud": "paperspace",
+   "shade_instance_type": "H100",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 599
+  },
+  {
+   "cloud": "voltagepark",
+   "shade_instance_type": "H100_sxm5x2",
+   "gpu_type": "H100",
+   "num_gpus": 2,
+   "hourly_price": 398
+  },
+  {
+   "cloud": "digitalocean",
+   "shade_instance_type": "H100_sxm5x8",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 3528
+  },
+  {
+   "cloud": "hyperstack",
+   "shade_instance_type": "H100_sxm5x8",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 2560
+  },
+  {
+   "cloud": "voltagepark",
+   "shade_instance_type": "H100_sxm5",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 199
+  },
+  {
+   "cloud": "latitude",
+   "shade_instance_type": "H100x8_NVLINK",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 1434
+  },
+  {
+   "cloud": "denvr",
+   "shade_instance_type": "A100_sxm4x8",
+   "gpu_type": "A100",
+   "num_gpus": 8,
+   "hourly_price": 1120
+  },
+  {
+   "cloud": "crusoe",
+   "shade_instance_type": "A100",
+   "gpu_type": "A100",
+   "num_gpus": 1,
+   "hourly_price": 145
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "A100_sxm4",
+   "gpu_type": "A100",
+   "num_gpus": 1,
+   "hourly_price": 199
+  },
+  {
+   "cloud": "scaleway",
+   "shade_instance_type": "H100x2",
+   "gpu_type": "H100",
+   "num_gpus": 2,
+   "hourly_price": 660
+  },
+  {
+   "cloud": "latitude",
+   "shade_instance_type": "H100x4",
+   "gpu_type": "H100",
+   "num_gpus": 4,
+   "hourly_price": 897
+  },
+  {
+   "cloud": "crusoe",
+   "shade_instance_type": "A100x8",
+   "gpu_type": "A100",
+   "num_gpus": 8,
+   "hourly_price": 1160
+  },
+  {
+   "cloud": "crusoe",
+   "shade_instance_type": "A100x4",
+   "gpu_type": "A100",
+   "num_gpus": 4,
+   "hourly_price": 580
+  },
+  {
+   "cloud": "crusoe",
+   "shade_instance_type": "A100x2",
+   "gpu_type": "A100",
+   "num_gpus": 2,
+   "hourly_price": 290
+  },
+  {
+   "cloud": "hyperstack",
+   "shade_instance_type": "H100x8",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 2000
+  },
+  {
+   "cloud": "hyperstack",
+   "shade_instance_type": "H100x4",
+   "gpu_type": "H100",
+   "num_gpus": 4,
+   "hourly_price": 1000
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "H100_sxm5",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 436
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "H100_sxm5x2",
+   "gpu_type": "H100",
+   "num_gpus": 2,
+   "hourly_price": 838
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "H100_sxm5x4",
+   "gpu_type": "H100",
+   "num_gpus": 4,
+   "hourly_price": 1636
+  },
+  {
+   "cloud": "digitalocean",
+   "shade_instance_type": "H100_sxm5",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 441
+  },
+  {
+   "cloud": "massedcompute",
+   "shade_instance_type": "H100x4",
+   "gpu_type": "H100",
+   "num_gpus": 4,
+   "hourly_price": 1091
+  },
+  {
+   "cloud": "nebius",
+   "shade_instance_type": "H100_sxm5x8_NVLINK",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 3093
+  },
+  {
+   "cloud": "nebius",
+   "shade_instance_type": "H100_sxm5",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 398
+  },
+  {
+   "cloud": "paperspace",
+   "shade_instance_type": "A100x8",
+   "gpu_type": "A100",
+   "num_gpus": 8,
+   "hourly_price": 2488
+  },
+  {
+   "cloud": "paperspace",
+   "shade_instance_type": "A100",
+   "gpu_type": "A100",
+   "num_gpus": 1,
+   "hourly_price": 319
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "A100",
+   "gpu_type": "A100",
+   "num_gpus": 1,
+   "hourly_price": 199
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "A100x4",
+   "gpu_type": "A100",
+   "num_gpus": 4,
+   "hourly_price": 796
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "A100x8",
+   "gpu_type": "A100",
+   "num_gpus": 8,
+   "hourly_price": 1592
+  },
+  {
+   "cloud": "paperspace",
+   "shade_instance_type": "A100x4",
+   "gpu_type": "A100",
+   "num_gpus": 4,
+   "hourly_price": 1244
+  },
+  {
+   "cloud": "hyperstack",
+   "shade_instance_type": "H100",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 250
+  },
+  {
+   "cloud": "nebius",
+   "shade_instance_type": "B200_sxm5x8_NVLINK",
+   "gpu_type": "B200",
+   "num_gpus": 8,
+   "hourly_price": 7600
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "H100",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 429
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "A100x2",
+   "gpu_type": "A100",
+   "num_gpus": 2,
+   "hourly_price": 398
+  },
+  {
+   "cloud": "paperspace",
+   "shade_instance_type": "A100x2",
+   "gpu_type": "A100",
+   "num_gpus": 2,
+   "hourly_price": 626
+  },
+  {
+   "cloud": "excesssupply",
+   "shade_instance_type": "H100_X8_2",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 2400
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "H100_sxm5x8",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 3192
+  },
+  {
+   "cloud": "hyperstack",
+   "shade_instance_type": "H100x2",
+   "gpu_type": "H100",
+   "num_gpus": 2,
+   "hourly_price": 500
+  },
+  {
+   "cloud": "imwt",
+   "shade_instance_type": "H100x8",
+   "gpu_type": "H100",
+   "num_gpus": 8,
+   "hourly_price": 1984
+  },
+  {
+   "cloud": "imwt",
+   "shade_instance_type": "H100x2",
+   "gpu_type": "H100",
+   "num_gpus": 2,
+   "hourly_price": 496
+  },
+  {
+   "cloud": "imwt",
+   "shade_instance_type": "H100x4",
+   "gpu_type": "H100",
+   "num_gpus": 4,
+   "hourly_price": 992
+  },
+  {
+   "cloud": "imwt",
+   "shade_instance_type": "H100",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 248
+  },
+  {
+   "cloud": "denvr",
+   "shade_instance_type": "A100_sxm4",
+   "gpu_type": "A100",
+   "num_gpus": 1,
+   "hourly_price": 140
+  },
+  {
+   "cloud": "excesssupply",
+   "shade_instance_type": "B200_sxm5x8_NVLINK",
+   "gpu_type": "B200",
+   "num_gpus": 8,
+   "hourly_price": 3611
+  },
+  {
+   "cloud": "latitude",
+   "shade_instance_type": "H100_vm",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 166
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "B200_sxm6x8",
+   "gpu_type": "B200",
+   "num_gpus": 8,
+   "hourly_price": 5352
+  },
+  {
+   "cloud": "massedcompute",
+   "shade_instance_type": "H100x2",
+   "gpu_type": "H100",
+   "num_gpus": 2,
+   "hourly_price": 546
+  },
+  {
+   "cloud": "massedcompute",
+   "shade_instance_type": "H100",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 273
+  },
+  {
+   "cloud": "boostrun",
+   "shade_instance_type": "B200_sxm6x8_NVLINK",
+   "gpu_type": "B200",
+   "num_gpus": 8,
+   "hourly_price": 2992
+  },
+  {
+   "cloud": "verda",
+   "shade_instance_type": "A100_sxm4",
+   "gpu_type": "A100",
+   "num_gpus": 1,
+   "hourly_price": 136
+  },
+  {
+   "cloud": "verda",
+   "shade_instance_type": "A100_sxm4x8",
+   "gpu_type": "A100",
+   "num_gpus": 8,
+   "hourly_price": 1088
+  },
+  {
+   "cloud": "verda",
+   "shade_instance_type": "H100_sxm5",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 331
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "B200_sxm6x4",
+   "gpu_type": "B200",
+   "num_gpus": 4,
+   "hourly_price": 2716
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "B200_sxm6x2",
+   "gpu_type": "B200",
+   "num_gpus": 2,
+   "hourly_price": 1378
+  },
+  {
+   "cloud": "lambdalabs",
+   "shade_instance_type": "B200_sxm6",
+   "gpu_type": "B200",
+   "num_gpus": 1,
+   "hourly_price": 699
+  },
+  {
+   "cloud": "verda",
+   "shade_instance_type": "B200x4",
+   "gpu_type": "B200",
+   "num_gpus": 4,
+   "hourly_price": 2567
+  },
+  {
+   "cloud": "verda",
+   "shade_instance_type": "B200x8",
+   "gpu_type": "B200",
+   "num_gpus": 8,
+   "hourly_price": 5044
+  },
+  {
+   "cloud": "verda",
+   "shade_instance_type": "B200",
+   "gpu_type": "B200",
+   "num_gpus": 1,
+   "hourly_price": 652
+  },
+  {
+   "cloud": "verda",
+   "shade_instance_type": "B200x2",
+   "gpu_type": "B200",
+   "num_gpus": 2,
+   "hourly_price": 1304
+  },
+  {
+   "cloud": "scaleway",
+   "shade_instance_type": "H100",
+   "gpu_type": "H100",
+   "num_gpus": 1,
+   "hourly_price": 330
+  }
+ ]
+}

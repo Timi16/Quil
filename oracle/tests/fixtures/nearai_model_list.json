@@ -1,0 +1,252 @@
+{
+ "models": [
+  {
+   "modelId": "anthropic/claude-fable-5",
+   "inputCostPerToken": {
+    "amount": 10000,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 50000,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "anthropic/claude-fable-5-1",
+   "inputCostPerToken": {
+    "amount": 10000,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 50000,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "black-forest-labs/FLUX.2-klein-4B",
+   "inputCostPerToken": {
+    "amount": 1000,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 1000,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+   "inputCostPerToken": {
+    "amount": 300,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 1200,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "deepseek-ai/DeepSeek-V4.1-Flash-1017-abliterated",
+   "inputCostPerToken": {
+    "amount": 300,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 1200,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "deepseek/deepseek-v3.2",
+   "inputCostPerToken": {
+    "amount": 1100,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 1100,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "levanto/sage-2",
+   "inputCostPerToken": {
+    "amount": 70,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 2000,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "moonshotai/kimi-k2.6",
+   "inputCostPerToken": {
+    "amount": 810,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 3850,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "moonshotai/kimi-k3",
+   "inputCostPerToken": {
+    "amount": 3300,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 16500,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "openai/privacy-filter",
+   "inputCostPerToken": {
+    "amount": 10,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 0,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "openai/whisper-large-v3",
+   "inputCostPerToken": {
+    "amount": 10,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 10,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "Qwen/Qwen3.6-35B-A3B-FP8",
+   "inputCostPerToken": {
+    "amount": 170,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 1100,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "Qwen/Qwen3.8-27B",
+   "inputCostPerToken": {
+    "amount": 40,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 1350,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "Qwen/Qwen3.8-27B-abliterated",
+   "inputCostPerToken": {
+    "amount": 40,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 1350,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "Qwen/Qwen3-Embedding-0.6B",
+   "inputCostPerToken": {
+    "amount": 10,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 10,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "Qwen/Qwen3-Reranker-0.6B",
+   "inputCostPerToken": {
+    "amount": 10,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 10,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+   "inputCostPerToken": {
+    "amount": 150,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 550,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "z-ai/glm-5.3",
+   "inputCostPerToken": {
+    "amount": 1800,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 5750,
+    "scale": 9,
+    "currency": "USD"
+   }
+  },
+  {
+   "modelId": "z-ai/glm-5.3-flash",
+   "inputCostPerToken": {
+    "amount": 80,
+    "scale": 9,
+    "currency": "USD"
+   },
+   "outputCostPerToken": {
+    "amount": 500,
+    "scale": 9,
+    "currency": "USD"
+   }
+  }
+ ],
+ "total": 63
+}

@@ -5,6 +5,7 @@ members = [
     "contracts/claim-market",
     "contracts/fixing-oracle",
     "contracts/mock-usdc",
+    "oracle",
 ]
 
 [workspace.package]
