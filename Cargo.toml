@@ -4,6 +4,7 @@ members = [
     "crates/quill-core",
     "contracts/claim-market",
     "contracts/fixing-oracle",
+    "contracts/mock-usdc",
 ]
 
 [workspace.package]

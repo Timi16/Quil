@@ -1,0 +1,17 @@
+[package]
+name = "mock-usdc"
+description = "TEST ONLY. A NEP-141 token with 6 decimals and an open faucet, standing in for USDC on testnet."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = { workspace = true }
+near-contract-standards = "5"
+
+[dev-dependencies]
+near-sdk = { workspace = true, features = ["unit-testing"] }
