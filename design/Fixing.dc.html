@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quill fixing and TEE attestation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFF5E8}
+a{color:#17130F}a:hover{color:#2742F5}
+.qrow{transition:background .12s ease-out}.qrow:hover{background:#FFF0C2}
+button:focus-visible,a:focus-visible{outline:3px solid #2742F5;outline-offset:2px}
+@keyframes qPulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes qStamp{0%{transform:rotate(-8deg) scale(1.7);opacity:0}60%{transform:rotate(-8deg) scale(.94);opacity:1}100%{transform:rotate(-8deg) scale(1);opacity:1}}
+@keyframes qFlow{from{background-position:0 0}to{background-position:24px 0}}
+@keyframes qBlink{0%,91%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="min-height: 1180px; background-color: #FFF5E8; background-image: radial-gradient(rgba(23,19,15,0.12) 1px, transparent 1px); background-size: 22px 22px; color: #17130F; font-family: 'DM Sans', system-ui, sans-serif">
+  <dc-import name="AppNav" active="fixing" hint-size="100%,98px"></dc-import>
+
+  <main style="max-width: 1280px; margin: 0 auto; padding: 36px 24px 56px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 44px; letter-spacing: -0.02em; line-height: 1">The price, and the <span style="background: #FFC93C; padding: 0 8px; border-radius: 8px">proof.</span></h1>
+        <p style="margin: 0; font-size: 16px; color: #5B5047; max-width: 660px">Every hour an enclave reads public GPU prices, takes the median and signs it. The contract only accepts a fixing with a valid attestation.</p>
+      </div>
+      <div role="group" aria-label="Choose index" style="display: flex; border: 2px solid #17130F; border-radius: 10px; overflow: hidden; background: #FFFDF8">
+        <button type="button" aria-pressed="true" style="height: 44px; padding: 0 16px; border: 0; background: #17130F; color: #FFF5E8; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer">H100</button>
+        <button type="button" aria-pressed="false" style="height: 44px; padding: 0 16px; border: 0; border-left: 2px solid #17130F; background: #FFFDF8; color: #17130F; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; cursor: pointer">B200</button>
+        <button type="button" aria-pressed="false" style="height: 44px; padding: 0 16px; border: 0; border-left: 2px solid #17130F; background: #FFFDF8; color: #17130F; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; cursor: pointer">INF-OUT</button>
+      </div>
+    </div>
+
+    <section aria-label="How the fixing is made" style="display: flex; flex-wrap: wrap; align-items: stretch; gap: 0">
+      <div style="flex: 1 1 220px; min-width: 0; background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">01 · READ</span>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px">4 public sources</span>
+        <span style="font-size: 13px; line-height: 1.45; color: #5B5047">Akash, RunPod, Vast.ai, Shadeform. Live H100 listings.</span>
+      </div>
+      <div aria-hidden="true" style="flex: 0 0 36px; align-self: center; height: 4px; background-image: linear-gradient(90deg, #17130F 50%, transparent 50%); background-size: 12px 4px; animation: qFlow .8s linear infinite"></div>
+      <div style="flex: 1 1 220px; min-width: 0; background: #17130F; color: #FFF5E8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #FFC93C; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #FFC93C">02 · COMPUTE IN A TEE</span>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px">Median of medians</span>
+        <span style="font-size: 13px; line-height: 1.45; color: #C9BDB0">One median per provider, then the median across them. Nobody can edit it mid-run.</span>
+      </div>
+      <div aria-hidden="true" style="flex: 0 0 36px; align-self: center; height: 4px; background-image: linear-gradient(90deg, #17130F 50%, transparent 50%); background-size: 12px 4px; animation: qFlow .8s linear infinite"></div>
+      <div style="flex: 1 1 220px; min-width: 0; background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">03 · ATTEST</span>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px">Signed by the enclave</span>
+        <span style="font-size: 13px; line-height: 1.45; color: #5B5047">The proof names the exact code that ran and the inputs it saw.</span>
+      </div>
+      <div aria-hidden="true" style="flex: 0 0 36px; align-self: center; height: 4px; background-image: linear-gradient(90deg, #17130F 50%, transparent 50%); background-size: 12px 4px; animation: qFlow .8s linear infinite"></div>
+      <div style="flex: 1 1 220px; min-width: 0; background: #DFF3E7; border: 2px solid #17130F; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #0F5C38">04 · WRITE ON NEAR</span>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px">Checked, then stored</span>
+        <span style="font-size: 13px; line-height: 1.45; color: #2F4A3C">The contract verifies the proof before a fixing can settle a market.</span>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section aria-label="Latest fixing" style="flex: 999 1 560px; min-width: 0; background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 6px 6px 0 #17130F">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 2px dashed #17130F; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.1em">
+          <span>FIXING · #000412 · H100</span>
+          <span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 50%; background: #137447; animation: qPulse 1.6s ease-in-out infinite"></span>NEXT IN {{countdown}}</span>
+        </div>
+        <div style="padding: 18px 20px 6px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 14px">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">MEDIAN · 11 NOV 2026 14:00 UTC</span>
+            <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: -0.02em">$3.06<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; color: #5B5047; letter-spacing: 0"> / GPU-hr</span></span>
+          </div>
+          <span style="margin-bottom: 8px; padding: 7px 14px; border: 3px solid #137447; border-radius: 8px; color: #137447; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; letter-spacing: 0.1em; animation: qStamp .6s ease-out .4s both">ATTESTED · TEE</span>
+        </div>
+        <div style="overflow-x: auto">
+          <table style="width: 100%; min-width: 560px; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+            <thead>
+              <tr style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047; text-align: right">
+                <th scope="col" style="padding: 10px 20px; text-align: left; border-bottom: 3px double #17130F; font-weight: 500">SOURCE</th>
+                <th scope="col" style="padding: 10px 12px; border-bottom: 3px double #17130F; font-weight: 500">LISTINGS READ</th>
+                <th scope="col" style="padding: 10px 12px; border-bottom: 3px double #17130F; font-weight: 500">PROVIDER MEDIAN</th>
+                <th scope="col" style="padding: 10px 20px 10px 12px; border-bottom: 3px double #17130F; font-weight: 500">STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{sources}}" as="s" hint-placeholder-count="4">
+                <tr class="qrow" style="border-top: 1px solid #E6D9C6">
+                  <th scope="row" style="padding: 12px 20px; text-align: left; font-weight: 600">{{s.name}} <span style="font-weight: 400; font-size: 11px; color: #5B5047">{{s.api}}</span></th>
+                  <td style="padding: 12px 12px; text-align: right">{{s.n}}</td>
+                  <td style="padding: 12px 12px; text-align: right; font-weight: 600">{{s.price}}</td>
+                  <td style="padding: 12px 20px 12px 12px; text-align: right"><span style="font-size: 11px; font-weight: 600; color: #137447; border: 1.5px solid #137447; border-radius: 4px; padding: 1px 6px">IN</span></td>
+                </tr>
+              </sc-for>
+              <tr style="border-top: 3px double #17130F; background: #FFF0C2">
+                <th scope="row" style="padding: 12px 20px; text-align: left; font-weight: 600">Median across providers</th>
+                <td style="padding: 12px 12px; text-align: right">183</td>
+                <td style="padding: 12px 12px; text-align: right; font-weight: 600; font-size: 15px">3.06</td>
+                <td style="padding: 12px 20px 12px 12px; text-align: right; font-size: 11px">USD/GPU-hr</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin: 0; padding: 12px 20px; border-top: 1px solid #E6D9C6; font-size: 13px; line-height: 1.5; color: #5B5047">The proof shows our code read these prices and did this maths. It can't show that a list price is what you'd really pay.</p>
+      </section>
+
+      <aside aria-label="Attestation" style="flex: 1 1 380px; min-width: 0; background: #17130F; color: #FFF5E8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 6px 6px 0 #FFC93C; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; align-items: center; gap: 12px">
+          <span style="width: 40px; height: 40px; border-radius: 10px; background: #46C98A; color: #17130F; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5-4.3-1.5-7.5-5-7.5-9.5V6L12 3z"></path><path d="M8.5 12l2.5 2.5 4.5-5"></path></svg>
+          </span>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px">Attestation valid</h2>
+            <span style="font-size: 13px; color: #C9BDB0">Verified by the contract, not by us.</span>
+          </div>
+        </div>
+        <dl style="margin: 0; display: flex; flex-direction: column; font-family: 'IBM Plex Mono', monospace; font-size: 12px">
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #3A322B"><dt style="color: #C9BDB0; letter-spacing: 0.06em">ENCLAVE</dt><dd style="margin: 0">OutLayer TEE</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #3A322B"><dt style="color: #C9BDB0; letter-spacing: 0.06em">CODE HASH</dt><dd style="margin: 0">sha256:7f3c…a91e</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #3A322B"><dt style="color: #C9BDB0; letter-spacing: 0.06em">MATCHES BUILD</dt><dd style="margin: 0; color: #7BE0A8">GitHub commit 4e2a9c1</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #3A322B"><dt style="color: #C9BDB0; letter-spacing: 0.06em">INPUTS HASH</dt><dd style="margin: 0">b81d…04cf</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #3A322B"><dt style="color: #C9BDB0; letter-spacing: 0.06em">CONTRACT</dt><dd style="margin: 0">fixing.quill.testnet</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #3A322B; border-bottom: 1px solid #3A322B"><dt style="color: #C9BDB0; letter-spacing: 0.06em">NEAR TX</dt><dd style="margin: 0"><a href="https://testnet.nearblocks.io" style="color: #FFC93C">9Fh2…Lw4s ↗</a></dd></div>
+        </dl>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 13px; font-weight: 700">Don't trust us. Rebuild it.</span>
+          <pre style="margin: 0; padding: 12px; background: #241E19; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; color: #E9DFD3">$ git clone [YOUR-REPO] &amp;&amp; cd oracle
+$ docker build . --quiet
+sha256:7f3c…a91e  <span style="color: #7BE0A8">same as on-chain</span></pre>
+        </div>
+      </aside>
+    </div>
+
+    <section aria-label="Fixing history" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; overflow: hidden">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 20px">
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px">Recent fixings</h2>
+        <a href="Feed.dc.html" style="font-weight: 700; font-size: 14px; padding: 10px 0">Get these by API →</a>
+      </div>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; min-width: 760px; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+          <thead>
+            <tr style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047; text-align: left">
+              <th scope="col" style="padding: 10px 20px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">FIXING</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">TIME · UTC</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500; text-align: right">H100</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500; text-align: right">CHANGE</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">SOURCES</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">PROOF</th>
+              <th scope="col" style="padding: 10px 20px 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">NEAR TX</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{history}}" as="h" hint-placeholder-count="5">
+              <tr class="qrow" style="border-top: 1px solid #E6D9C6">
+                <td style="padding: 12px 20px; font-weight: 600">{{h.id}}</td>
+                <td style="padding: 12px 12px; color: #5B5047">{{h.time}}</td>
+                <td style="padding: 12px 12px; text-align: right; font-weight: 600">{{h.value}}</td>
+                <td style="{{h.chgStyle}}">{{h.chg}}</td>
+                <td style="padding: 12px 12px">4 of 4</td>
+                <td style="padding: 12px 12px"><span style="font-size: 11px; font-weight: 600; color: #137447; border: 1.5px solid #137447; border-radius: 4px; padding: 1px 6px">ATTESTED</span></td>
+                <td style="padding: 12px 20px 12px 12px"><a href="https://testnet.nearblocks.io">{{h.tx}}</a></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { left: 22 * 60 + 41 };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => this.setState({ left: this.state.left > 0 ? this.state.left - 1 : 3599 }), 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  renderVals() {
+    const left = this.state.left;
+    const pad = (n) => String(n).padStart(2, '0');
+    const chg =(v) => 'padding: 12px 12px; text-align: right; ' + (v.startsWith('+') ? 'color: #137447' : v.startsWith('−') ? 'color: #9A2F06' : 'color: #5B5047');
+    return {
+      countdown: pad(Math.floor(left / 60)) + ':' + pad(left % 60),
+      sources: [
+        { name: 'Akash', api: 'public API', n: '38', price: '2.84' },
+        { name: 'RunPod', api: 'public API', n: '52', price: '2.99' },
+        { name: 'Vast.ai', api: '/api/v0/bundles', n: '71', price: '3.12' },
+        { name: 'Shadeform', api: 'public API', n: '22', price: '3.21' }
+      ],
+      history: [
+        { id: '#000412', time: '11 Nov 14:00', value: '3.06', chg: '+0.02', tx: '9Fh2…Lw4s' },
+        { id: '#000411', time: '11 Nov 13:00', value: '3.04', chg: '+0.02', tx: '4Kd8…Pq1z' },
+        { id: '#000410', time: '11 Nov 12:00', value: '3.02', chg: '−0.02', tx: 'Bw3n…7Yte' },
+        { id: '#000409', time: '11 Nov 11:00', value: '3.04', chg: 'no change', tx: 'Mx5c…Ha2r' },
+        { id: '#000408', time: '11 Nov 10:00', value: '3.04', chg: '−0.03', tx: 'Tz9q…Vu6d' }
+      ].map((h) => ({ ...h, chgStyle: chg(h.chg) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

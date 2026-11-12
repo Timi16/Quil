@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quill brand sheet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+@keyframes qBlink{0%,91%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes qFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 1200px; height: 760px; box-sizing: border-box; padding: 40px 44px; background-color: #FFF5E8; background-image: radial-gradient(rgba(23,19,15,0.12) 1px, transparent 1px); background-size: 22px 22px; color: #17130F; font-family: 'DM Sans', system-ui, sans-serif; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-rows: min-content; gap: 22px">
+
+  <div style="grid-column: span 5; background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #5B5047">LOGO</span>
+    <div style="display: flex; align-items: center; gap: 14px">
+      <svg viewBox="0 0 32 32" width="64" height="64" role="img" aria-label="Quill mark"><rect x="1" y="1" width="30" height="30" rx="8" fill="#FFC93C" stroke="#17130F" stroke-width="2"></rect><path d="M6 22l4-9 4 6 4-10 4 9 3-4" fill="none" stroke="#17130F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="26.2" cy="21.6" r="1.8" fill="#17130F"></circle></svg>
+      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 56px; letter-spacing: -0.03em; line-height: 1">quill</span>
+    </div>
+    <span style="font-size: 14px; line-height: 1.5; color: #5B5047">The mark is a row of quills that reads as a price chart, ending in the hedgehog's nose. Sun tile, ink line. Never recolour it.</span>
+  </div>
+
+  <div style="grid-column: span 7; background: #FBE7CF; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #5B5047">MASCOT · QUILL THE HEDGEHOG</span>
+    <div style="display: flex; align-items: flex-end; gap: 36px">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px"><div style="animation: qFloat 4.5s ease-in-out infinite"><dc-import name="Mascot" pose="stand" size="190" hint-size="190px,125px"></dc-import></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">STAND · watching the price</span></div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px"><dc-import name="Mascot" pose="ball" size="110" hint-size="110px,110px"></dc-import><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">BALL · can't be liquidated</span></div>
+      <span style="flex: 1; font-size: 14px; line-height: 1.5; color: #4A4038">A hedge-hog for a hedging market. Flat fills, 3px ink outline, sun-tipped quills. It perches on cards, floats gently and blinks. It never talks.</span>
+    </div>
+  </div>
+
+  <div style="grid-column: span 7; background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #5B5047">COLOUR</span>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+      <sc-for list="{{swatches}}" as="s" hint-placeholder-count="8">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span style="{{s.chip}}"></span>
+          <span style="font-weight: 700; font-size: 13px">{{s.name}}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">{{s.hex}} · {{s.use}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="grid-column: span 5; background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #5B5047">TYPE</span>
+    <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 40px; letter-spacing: -0.02em; line-height: 1">Bricolage 800 <span style="background: #FFC93C; padding: 0 6px; border-radius: 6px">headlines</span></span>
+    <span style="font-size: 16px; line-height: 1.5; color: #5B5047">DM Sans for everything people read. Short, plain sentences.</span>
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">IBM Plex Mono · 3.06 USD/GPU-hr · 7f3c…a91e</span>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding-top: 6px">
+      <span style="height: 44px; padding: 0 16px; display: flex; align-items: center; background: #FFC93C; border: 2px solid #17130F; border-radius: 10px; box-shadow: 3px 3px 0 #17130F; font-weight: 700; font-size: 14px">Primary</span>
+      <span style="height: 44px; padding: 0 16px; display: flex; align-items: center; background: #FFFDF8; border: 2px solid #17130F; border-radius: 10px; box-shadow: 3px 3px 0 #17130F; font-weight: 700; font-size: 14px">Secondary</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 12px; border: 2px solid #17130F; border-radius: 6px; padding: 3px 8px; background: #E3E8FF; color: #1B2FB8">LONG</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 12px; border: 2px solid #17130F; border-radius: 6px; padding: 3px 8px; background: #FFE4D6; color: #9A2F06">SHORT</span>
+      <span style="padding: 4px 10px; border: 3px solid #137447; border-radius: 8px; color: #137447; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; transform: rotate(-6deg)">ATTESTED</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const chip = (c) => 'height: 54px; border: 2px solid #17130F; border-radius: 10px; background: ' + c;
+    return {
+      swatches: [
+        { name: 'Paper', hex: '#FFF5E8', use: 'page' },
+        { name: 'Paper deep', hex: '#FBE7CF', use: 'quiet panels' },
+        { name: 'Ink', hex: '#17130F', use: 'text, borders' },
+        { name: 'Sun', hex: '#FFC93C', use: 'action, highlight' },
+        { name: 'Cobalt', hex: '#2742F5', use: 'LONG' },
+        { name: 'Ember', hex: '#F26A2E', use: 'SHORT' },
+        { name: 'Leaf', hex: '#137447', use: 'attested' },
+        { name: 'Ink soft', hex: '#5B5047', use: 'secondary text' }
+      ].map((s) => ({ ...s, chip: chip(s.hex) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

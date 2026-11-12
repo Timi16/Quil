@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quill portfolio</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFF5E8}
+a{color:#17130F}a:hover{color:#2742F5}
+.qb{transition:transform .12s ease-out,box-shadow .12s ease-out}
+.qb:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 #17130F !important;color:#17130F}
+.qrow{transition:background .12s ease-out}.qrow:hover{background:#FFF0C2}
+button:focus-visible,a:focus-visible{outline:3px solid #2742F5;outline-offset:2px}
+@keyframes qFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+@keyframes qNudge{0%,86%,100%{translate:0 0}92%{translate:-3px -3px}}
+@keyframes qBlink{0%,91%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="min-height: 1000px; background-color: #FFF5E8; background-image: radial-gradient(rgba(23,19,15,0.12) 1px, transparent 1px); background-size: 22px 22px; color: #17130F; font-family: 'DM Sans', system-ui, sans-serif">
+  <dc-import name="AppNav" active="portfolio" hint-size="100%,98px"></dc-import>
+
+  <main style="max-width: 1280px; margin: 0 auto; padding: 36px 24px 56px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 44px; letter-spacing: -0.02em; line-height: 1">Portfolio</h1>
+        <p style="margin: 0; font-size: 16px; color: #5B5047">What you hold, what it's worth now, and what's ready to claim.</p>
+      </div>
+      <a class="qb" href="Settlement.dc.html" style="animation: qNudge 3.2s ease-in-out infinite; min-height: 48px; padding: 0 18px; display: flex; align-items: center; gap: 10px; background: #DFF3E7; border: 2px solid #17130F; border-radius: 10px; box-shadow: 3px 3px 0 #17130F; text-decoration: none; font-weight: 700; font-size: 15px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; background: #137447; color: #FFFFFF; border-radius: 4px; padding: 2px 6px">SETTLED</span>
+        Claim 119.00 USDC
+      </a>
+    </div>
+
+    <section aria-label="Summary" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))">
+      <sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
+        <div style="{{s.cell}}">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">{{s.label}}</span>
+          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 30px; line-height: 1.1">{{s.value}} <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; color: #5B5047">USDC</span></span>
+          <span style="font-size: 13px; color: #5B5047">{{s.note}}</span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section aria-label="Positions" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; overflow: hidden">
+      <h2 style="margin: 0; padding: 16px 20px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px">Positions</h2>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; min-width: 1000px; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+          <thead>
+            <tr style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047; text-align: right">
+              <th scope="col" style="padding: 10px 20px; text-align: left; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">MARKET</th>
+              <th scope="col" style="padding: 10px 12px; text-align: left; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">SIDE</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">SIZE</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">PAID</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">WORTH NOW</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">RANGE AT EXPIRY</th>
+              <th scope="col" style="padding: 10px 12px; text-align: left; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">STATUS</th>
+              <th scope="col" style="padding: 10px 20px 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Action</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{positions}}" as="p" hint-placeholder-count="3">
+              <tr class="qrow" style="border-top: 1px solid #E6D9C6">
+                <th scope="row" style="padding: 14px 20px; text-align: left; white-space: nowrap; font-weight: 600; font-size: 14px">{{p.market}}<br><span style="font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 12px; color: #5B5047">{{p.index}}</span></th>
+                <td style="padding: 14px 12px; text-align: left"><span style="{{p.sideStyle}}">{{p.side}}</span></td>
+                <td style="padding: 14px 12px; text-align: right; white-space: nowrap">{{p.size}}</td>
+                <td style="padding: 14px 12px; text-align: right; white-space: nowrap">{{p.paid}}</td>
+                <td style="padding: 14px 12px; text-align: right; white-space: nowrap; font-weight: 600; font-size: 15px">{{p.now}}</td>
+                <td style="padding: 14px 12px; text-align: right; white-space: nowrap; color: #5B5047">{{p.range}}</td>
+                <td style="padding: 14px 12px; text-align: left; white-space: nowrap"><span style="{{p.statusStyle}}">{{p.status}}</span> <span style="color: #5B5047">{{p.when}}</span></td>
+                <td style="padding: 10px 20px 10px 12px; text-align: right"><a class="qb" href="{{p.href}}" aria-label="{{p.aria}}" style="{{p.btn}}">{{p.action}}</a></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin: 0; padding: 12px 20px; border-top: 1px solid #E6D9C6; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">"Range at expiry" is the least and the most a position can pay. It can never go below zero. Illustrative testnet data.</p>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch">
+      <section aria-label="Activity" style="flex: 999 1 560px; min-width: 0; background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; overflow: hidden">
+        <h2 style="margin: 0; padding: 16px 20px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px">Activity</h2>
+        <div style="overflow-x: auto">
+          <table style="width: 100%; min-width: 560px; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+            <thead>
+              <tr style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047; text-align: left">
+                <th scope="col" style="padding: 10px 20px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">TIME · UTC</th>
+                <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">WHAT HAPPENED</th>
+                <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500; text-align: right">USDC</th>
+                <th scope="col" style="padding: 10px 20px 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">TX</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{activity}}" as="a" hint-placeholder-count="5">
+                <tr class="qrow" style="border-top: 1px solid #E6D9C6">
+                  <td style="padding: 12px 20px; color: #5B5047; white-space: nowrap">{{a.time}}</td>
+                  <td style="padding: 12px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px">{{a.what}}</td>
+                  <td style="{{a.amtStyle}}">{{a.amt}}</td>
+                  <td style="padding: 12px 20px 12px 12px; white-space: nowrap"><a href="https://testnet.nearblocks.io">{{a.tx}}</a></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <aside style="flex: 1 1 320px; min-width: 0; background: #FBE7CF; border: 2px solid #17130F; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; justify-content: center">
+        <div style="animation: qFloat 5s ease-in-out infinite"><dc-import name="Mascot" pose="ball" size="92" hint-size="92px,92px"></dc-import></div>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 24px; line-height: 1.12">Nothing here can be liquidated.</span>
+        <span style="font-size: 14px; line-height: 1.55; color: #4A4038">You paid in full up front. The worst a position can do is expire at zero. Nobody can close it for you, and there is no margin to top up.</span>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const cell = (i) => 'padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; ' + (i > 0 ? 'border-left: 1px solid #D9CBB8' : '');
+    const side = (s) => 'font-weight: 600; font-size: 12px; border: 2px solid #17130F; border-radius: 6px; padding: 3px 8px; ' + (s === 'LONG' ? 'background: #E3E8FF; color: #1B2FB8' : 'background: #FFE4D6; color: #9A2F06');
+    const open = 'font-size: 11px; font-weight: 600; border: 1.5px solid #17130F; border-radius: 4px; padding: 1px 6px';
+    const settled = 'font-size: 11px; font-weight: 600; color: #137447; border: 1.5px solid #137447; border-radius: 4px; padding: 1px 6px';
+    const btn = (bg) => 'display: inline-flex; align-items: center; height: 44px; padding: 0 16px; border: 2px solid #17130F; border-radius: 10px; box-shadow: 3px 3px 0 #17130F; text-decoration: none; color: #17130F; font-family: \'DM Sans\', sans-serif; font-weight: 700; font-size: 14px; white-space: nowrap; background: ' + bg;
+    const amt = (v) => 'padding: 12px 12px; text-align: right; white-space: nowrap; font-weight: 600; ' + (v.startsWith('+') ? 'color: #137447' : 'color: #17130F');
+    return {
+      stats: [
+        { label: 'FREE BALANCE', value: '1,240.00', note: 'ready to mint or buy with' },
+        { label: 'OPEN POSITIONS', value: '276.00', note: 'worth at current prices' },
+        { label: 'READY TO CLAIM', value: '119.00', note: 'H100 · 31 Oct settled' },
+        { label: 'MOST YOU CAN STILL RECEIVE', value: '530.00', note: 'if every open position pays in full' }
+      ].map((s, i) => ({ ...s, cell: cell(i) })),
+      positions: [
+        { market: 'H100 · 28 Nov', index: 'index now 3.06', side: 'LONG', size: '100', paid: '156.00', now: '156.00', range: '0.00 – 350.00', status: 'OPEN', when: '17 days left', action: 'Sell', href: 'Trade.dc.html', aria: 'Sell H100 LONG', statusStyle: open, btn: btn('#FFFDF8') },
+        { market: 'INF-OUT · 31 Dec', index: 'index now 0.60', side: 'SHORT', size: '200', paid: '120.00', now: '120.00', range: '0.00 – 180.00', status: 'OPEN', when: '50 days left', action: 'Sell', href: 'Trade.dc.html', aria: 'Sell inference SHORT', statusStyle: open, btn: btn('#FFFDF8') },
+        { market: 'H100 · 31 Oct', index: 'settled at 2.62', side: 'SHORT', size: '50', paid: '104.00', now: '119.00', range: 'final', status: 'SETTLED', when: 'attested', action: 'Claim 119.00', href: 'Settlement.dc.html', aria: 'Claim 119.00 USDC from H100 31 October', statusStyle: settled, btn: btn('#FFC93C') }
+      ].map((p) => ({ ...p, sideStyle: side(p.side) })),
+      activity: [
+        { time: '11 Nov 13:42', what: 'Bought 200 SHORT on INF-OUT · 31 Dec', amt: '−120.00', tx: 'Jd4p…Xe8m' },
+        { time: '11 Nov 13:20', what: 'Sold 100 SHORT on H100 · 28 Nov', amt: '+194.00', tx: 'Rv2k…Bn5c' },
+        { time: '11 Nov 13:18', what: 'Minted 100 pairs on H100 · 28 Nov', amt: '−350.00', tx: 'Ls7w…Qa3f' },
+        { time: '11 Nov 13:05', what: 'Added collateral from Base via NEAR Intents', amt: '+350.00', tx: '7Kq2…xP9d' },
+        { time: '31 Oct 14:00', what: 'H100 · 31 Oct settled at 2.62 (attested). 119.00 ready to claim', amt: '—', tx: 'Uc6r…Zt1v' }
+      ].map((a) => ({ ...a, amtStyle: amt(a.amt) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quill app navigation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="font-family: 'DM Sans', system-ui, sans-serif; color: #17130F">
+  <div style="background: #1B6B4A; color: #FFF5E8; text-align: center; padding: 7px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.1em">NEAR TESTNET · NO REAL MONEY</div>
+  <header style="border-bottom: 2px solid #17130F; background: #FFF5E8">
+    <nav aria-label="App" style="max-width: 1280px; margin: 0 auto; padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px">
+      <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #17130F">
+        <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#FFC93C" stroke="#17130F" stroke-width="2"></rect><path d="M6 22l4-9 4 6 4-10 4 9 3-4" fill="none" stroke="#17130F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="26.2" cy="21.6" r="1.8" fill="#17130F"></circle></svg>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em">quill</span>
+      </a>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; flex-grow: 1">
+        <sc-for list="{{items}}" as="it" hint-placeholder-count="4">
+          <a href="{{it.href}}" aria-current="{{it.current}}" style="{{it.style}}">{{it.label}}</a>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+        <span style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; background: #FFFDF8; border: 2px solid #17130F; border-radius: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12px">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: #137447"></span>
+          tolu.testnet · 1,240.00 USDC
+        </span>
+        <a href="Collateral.dc.html" style="height: 40px; padding: 0 14px; display: flex; align-items: center; background: #FFC93C; border: 2px solid #17130F; border-radius: 10px; box-shadow: 3px 3px 0 #17130F; text-decoration: none; color: #17130F; font-weight: 700; font-size: 14px">Add collateral</a>
+      </div>
+    </nav>
+  </header>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["markets","portfolio","fixing","feed","none"],"default":"markets"},"$preview":{"width":1440,"height":110}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'markets';
+    const base = 'min-height: 40px; padding: 0 14px; display: flex; align-items: center; border-radius: 10px; text-decoration: none; font-size: 15px; ';
+    const on = base + 'background: #17130F; color: #FFF5E8; font-weight: 700';
+    const off = base + 'color: #17130F; font-weight: 500';
+    const items = [
+      { id: 'markets', label: 'Markets', href: 'Markets.dc.html' },
+      { id: 'portfolio', label: 'Portfolio', href: 'Portfolio.dc.html' },
+      { id: 'fixing', label: 'Fixing', href: 'Fixing.dc.html' },
+      { id: 'feed', label: 'Feed', href: 'Feed.dc.html' }
+    ].map((i) => ({ ...i, style: i.id === active ? on : off, current: i.id === active ? 'page' : undefined }));
+    return { items };
+  }
+}
+</script>
+</body>
+</html>

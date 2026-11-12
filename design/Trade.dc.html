@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trade H100 on Quill</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFF5E8}
+a{color:#17130F}a:hover{color:#2742F5}
+.qb{transition:transform .12s ease-out,box-shadow .12s ease-out}
+.qb:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 #17130F !important}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #2742F5;outline-offset:2px}
+@keyframes qDraw{from{stroke-dashoffset:1400}to{stroke-dashoffset:0}}
+@keyframes qPulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes qBlink{0%,91%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="min-height: 1240px; background-color: #FFF5E8; background-image: radial-gradient(rgba(23,19,15,0.12) 1px, transparent 1px); background-size: 22px 22px; color: #17130F; font-family: 'DM Sans', system-ui, sans-serif">
+  <dc-import name="AppNav" active="markets" hint-size="100%,98px"></dc-import>
+
+  <main style="max-width: 1280px; margin: 0 auto; padding: 28px 24px 56px; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <a href="Markets.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-decoration: none; color: #5B5047; padding: 6px 0">← Markets</a>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+          <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 40px; letter-spacing: -0.02em; line-height: 1">H100 · 28 Nov</h1>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; background: #E3E8FF; border: 1.5px solid #17130F; border-radius: 999px; padding: 3px 10px">GPU-HOUR</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; background: #FFFDF8; border: 1.5px solid #17130F; border-radius: 999px; padding: 3px 10px">EXPIRES IN 17 DAYS</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: baseline; gap: 12px">
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 48px; line-height: 1">$3.06</span>
+        <span style="display: flex; flex-direction: column; gap: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 12px"><span style="color: #5B5047">USD / GPU-hr</span><span style="color: #137447; font-weight: 600">+0.44 in 30 days</span></span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start">
+      <div style="flex: 999 1 620px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+
+        <section aria-label="Index chart" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; padding: 18px 20px 12px; display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px">
+            <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px">Quill H100 index, last 30 days</h2>
+            <a href="Fixing.dc.html" style="display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-decoration: none; padding: 8px 0">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #137447; animation: qPulse 1.6s ease-in-out infinite"></span>
+              Fixing #000412 <span style="color: #137447; font-weight: 600">attested</span> →
+            </a>
+          </div>
+          <svg viewBox="0 0 760 320" width="100%" role="img" aria-label="Line chart of the H100 index rising from 2.62 to 3.06 dollars per GPU-hour over 30 days, inside the market band of 1.50 to 5.00" style="display: block; overflow: visible; font-family: 'IBM Plex Mono', monospace">
+            <rect x="48" y="{{y.cap}}" width="632" height="{{bandH}}" fill="#FFF0C2" fill-opacity="0.55"></rect>
+            <sc-for list="{{grid}}" as="g" hint-placeholder-count="3">
+              <line x1="48" x2="680" y1="{{g.y}}" y2="{{g.y}}" stroke="#D9CBB8" stroke-width="1"></line>
+              <text x="40" y="{{g.ty}}" text-anchor="end" font-size="11" fill="#5B5047">{{g.label}}</text>
+            </sc-for>
+            <line x1="48" x2="680" y1="{{y.cap}}" y2="{{y.cap}}" stroke="#17130F" stroke-width="1.6" stroke-dasharray="6 5"></line>
+            <text x="688" y="{{y.capT}}" font-size="11" font-weight="600" fill="#17130F">cap 5.00</text>
+            <line x1="48" x2="680" y1="{{y.floor}}" y2="{{y.floor}}" stroke="#17130F" stroke-width="1.6" stroke-dasharray="6 5"></line>
+            <text x="688" y="{{y.floorT}}" font-size="11" font-weight="600" fill="#17130F">floor 1.50</text>
+            <path d="{{line}}" fill="none" stroke="#2742F5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1400" style="animation: qDraw 1.8s ease-out both"></path>
+            <circle cx="680" cy="{{y.now}}" r="6" fill="#2742F5" stroke="#17130F" stroke-width="2"></circle>
+            <text x="692" y="{{y.nowT}}" font-size="13" font-weight="600" fill="#1B2FB8">3.06 now</text>
+            <text x="48" y="312" font-size="11" fill="#5B5047">12 Oct</text>
+            <text x="364" y="312" text-anchor="middle" font-size="11" fill="#5B5047">27 Oct</text>
+            <text x="680" y="312" text-anchor="end" font-size="11" fill="#5B5047">11 Nov</text>
+          </svg>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">USD per GPU-hour · median of Akash, RunPod, Vast.ai and Shadeform · shaded area is this market's band</span>
+        </section>
+
+        <section aria-label="What each side gets" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; overflow: hidden">
+          <h2 style="margin: 0; padding: 16px 20px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px">What each side gets at expiry, per GPU-hour</h2>
+          <div style="overflow-x: auto">
+            <table style="width: 100%; min-width: 560px; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+              <thead>
+                <tr style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047; text-align: right">
+                  <th scope="col" style="padding: 10px 20px; text-align: left; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">IF H100 SETTLES AT</th>
+                  <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">LONG GETS</th>
+                  <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">SHORT GETS</th>
+                  <th scope="col" style="padding: 10px 20px 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">TOTAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{payoff}}" as="p" hint-placeholder-count="5">
+                  <tr style="{{p.tr}}">
+                    <th scope="row" style="padding: 12px 20px; text-align: left; font-weight: 500">{{p.at}} <span style="font-family: 'DM Sans', sans-serif; font-size: 12px; color: #5B5047">{{p.note}}</span></th>
+                    <td style="padding: 12px 12px; text-align: right; color: #1B2FB8; font-weight: 600">{{p.long}}</td>
+                    <td style="padding: 12px 12px; text-align: right; color: #9A2F06; font-weight: 600">{{p.short}}</td>
+                    <td style="padding: 12px 20px 12px 12px; text-align: right">3.50</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section aria-label="Market details" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; padding: 6px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+          <dl style="margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); column-gap: 32px">
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid #E6D9C6"><dt style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047">SETTLES ON</dt><dd style="margin: 0">24h average, 27–28 Nov</dd></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid #E6D9C6"><dt style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047">COLLATERAL</dt><dd style="margin: 0">3.50 USDC per pair</dd></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 11px 0"><dt style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047">CONTRACT</dt><dd style="margin: 0">claims.quill.testnet</dd></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 11px 0"><dt style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047">LIQUIDATIONS</dt><dd style="margin: 0; color: #137447; font-weight: 600">None. Fully backed.</dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <aside style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+        <section aria-label="Trade ticket" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; overflow: hidden">
+          <div role="group" aria-label="Choose an action" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 2px solid #17130F">
+            <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+              <button type="button" onClick="{{m.pick}}" aria-pressed="{{m.on}}" style="{{m.style}}">{{m.label}}</button>
+            </sc-for>
+          </div>
+          <div style="padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 16px">
+            <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #5B5047">{{blurb}}</p>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="size" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">SIZE · GPU-HOURS</label>
+              <div style="display: flex; align-items: center; border: 2px solid #17130F; border-radius: 10px; background: #FFFFFF; height: 56px; overflow: hidden">
+                <input id="size" type="number" min="1" step="1" inputmode="numeric" value="{{size}}" onChange="{{onSize}}" style="flex: 1; min-width: 0; height: 100%; border: 0; padding: 0 14px; font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: #17130F; background: transparent">
+                <div style="display: flex; gap: 6px; padding-right: 8px">
+                  <sc-for list="{{presets}}" as="p" hint-placeholder-count="3">
+                    <button type="button" onClick="{{p.pick}}" style="height: 40px; min-width: 44px; padding: 0 8px; border: 1.5px solid #17130F; border-radius: 8px; background: #FBE7CF; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; cursor: pointer; color: #17130F">{{p.label}}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="border-top: 3px double #17130F; display: flex; flex-direction: column; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+              <sc-for list="{{lines}}" as="l" hint-placeholder-count="4">
+                <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #E6D9C6"><span style="color: #5B5047">{{l.k}}</span><span style="{{l.vs}}">{{l.v}}</span></div>
+              </sc-for>
+            </div>
+            <a class="qb" href="Portfolio.dc.html" style="{{cta}}">{{ctaLabel}}</a>
+            <span style="font-size: 12px; color: #5B5047; text-align: center">Balance 1,240.00 USDC · <a href="Collateral.dc.html" style="font-weight: 700">Add from any chain</a></span>
+          </div>
+        </section>
+
+        <section aria-label="Order book" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; overflow: hidden; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px">
+            <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px">LONG order book</h2>
+            <span style="font-size: 11px; background: #FBE7CF; border: 1.5px solid #17130F; border-radius: 999px; padding: 2px 9px">Seeded by Quill</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 20px; font-size: 11px; letter-spacing: 0.08em; color: #5B5047; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F"><span>PRICE · USDC</span><span>SIZE · GPU-HRS</span></div>
+          <sc-for list="{{book}}" as="b" hint-placeholder-count="6">
+            <div style="{{b.row}}"><span style="{{b.ps}}">{{b.price}} <span style="font-size: 11px; font-weight: 400; color: #5B5047">{{b.side}}</span></span><span>{{b.size}}</span></div>
+          </sc-for>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'long', size: 100 };
+  }
+  renderVals() {
+    const { mode } = this.state;
+    const size = Math.max(1, Number(this.state.size) || 1);
+    const fmt = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const Y = (v) => 290 - ((v - 1) / 4.5) * 270;
+    const vals = [2.62, 2.6, 2.66, 2.64, 2.71, 2.69, 2.75, 2.72, 2.78, 2.83, 2.8, 2.86, 2.84, 2.9, 2.88, 2.93, 2.97, 2.94, 2.99, 2.96, 3.01, 2.98, 3.03, 3.0, 3.05, 3.02, 3.07, 3.04, 3.02, 3.06];
+    const line = vals.map((v, i) => (i === 0 ? 'M' : 'L') + (48 + (632 * i) / (vals.length - 1)).toFixed(1) + ' ' + Y(v).toFixed(1)).join(' ');
+    const tab = (on, tone) => 'height: 52px; border: 0; font-family: \'DM Sans\', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; ' + (on ? 'background: ' + tone.bg + '; color: ' + tone.fg : 'background: #FBE7CF; color: #17130F');
+    const tones = { mint: { bg: '#FFC93C', fg: '#17130F' }, long: { bg: '#2742F5', fg: '#FFFFFF' }, short: { bg: '#F26A2E', fg: '#17130F' } };
+    const strong = 'font-weight: 600';
+    const info = {
+      mint: {
+        blurb: 'Lock USDC and receive both tokens. Keep the side you want and sell the other, or hold both and get your USDC back at expiry.',
+        lines: [
+          { k: 'You lock', v: fmt(size * 3.5) + ' USDC', vs: strong },
+          { k: 'You get', v: size + ' LONG + ' + size + ' SHORT', vs: strong },
+          { k: 'Back at expiry, holding both', v: fmt(size * 3.5) + ' USDC', vs: '' },
+          { k: 'Fee', v: '0.00 on testnet', vs: '' }
+        ],
+        ctaLabel: 'Mint ' + size + ' pairs'
+      },
+      long: {
+        blurb: 'LONG pays more the higher H100 settles. Buy it if you rent GPUs and want to cap what a price rise costs you.',
+        lines: [
+          { k: 'You pay', v: fmt(size * 1.56) + ' USDC', vs: strong },
+          { k: 'Price per LONG', v: '1.56 USDC', vs: '' },
+          { k: 'You get at most', v: fmt(size * 3.5) + ' USDC', vs: 'color: #137447; font-weight: 600' },
+          { k: 'You break even at', v: 'H100 = $3.06', vs: '' }
+        ],
+        ctaLabel: 'Buy ' + size + ' LONG'
+      },
+      short: {
+        blurb: 'SHORT pays more the lower H100 settles. Buy it if you rent GPUs out and want cover against a price fall.',
+        lines: [
+          { k: 'You pay', v: fmt(size * 1.94) + ' USDC', vs: strong },
+          { k: 'Price per SHORT', v: '1.94 USDC', vs: '' },
+          { k: 'You get at most', v: fmt(size * 3.5) + ' USDC', vs: 'color: #137447; font-weight: 600' },
+          { k: 'You break even at', v: 'H100 = $3.06', vs: '' }
+        ],
+        ctaLabel: 'Buy ' + size + ' SHORT'
+      }
+    }[mode];
+    const tone = tones[mode];
+    const payoff = [
+      { at: '$1.50 or less', note: 'at the floor', v: 1.5 },
+      { at: '$2.00', note: '', v: 2 },
+      { at: '$3.06', note: 'today', v: 3.06 },
+      { at: '$4.00', note: '', v: 4 },
+      { at: '$5.00 or more', note: 'at the cap', v: 5 }
+    ].map((p) => ({ ...p, long: (p.v - 1.5).toFixed(2), short: (5 - p.v).toFixed(2), tr: 'border-top: 1px solid #E6D9C6; ' + (p.note === 'today' ? 'background: #FFF0C2' : '') }));
+    const book = [
+      { price: '1.58', size: '400', side: 'ask' },
+      { price: '1.57', size: '250', side: 'ask' },
+      { price: '1.56', size: '120', side: 'ask' },
+      { price: '1.54', size: '300', side: 'bid' },
+      { price: '1.53', size: '500', side: 'bid' },
+      { price: '1.51', size: '220', side: 'bid' }
+    ].map((b, i) => ({
+      ...b,
+      row: 'display: flex; justify-content: space-between; padding: 10px 20px; ' + (i === 3 ? 'border-top: 2px solid #17130F' : 'border-top: 1px solid #E6D9C6'),
+      ps: 'font-weight: 600; color: ' + (b.side === 'ask' ? '#9A2F06' : '#137447')
+    }));
+    return {
+      line,
+      y: { cap: Y(5), capT: Y(5) + 4, floor: Y(1.5), floorT: Y(1.5) + 4, now: Y(3.06), nowT: Y(3.06) - 12 },
+      bandH: Y(1.5) - Y(5),
+      grid: [2, 3, 4].map((v) => ({ y: Y(v), ty: Y(v) + 4, label: v.toFixed(2) })),
+      modes: [
+        { id: 'mint', label: 'Mint pair' },
+        { id: 'long', label: 'Buy LONG' },
+        { id: 'short', label: 'Buy SHORT' }
+      ].map((m) => ({ ...m, on: m.id === mode, pick: () => this.setState({ mode: m.id }), style: tab(m.id === mode, tones[m.id]) + (m.id !== 'short' ? '; border-right: 2px solid #17130F' : '') })),
+      blurb: info.blurb,
+      lines: info.lines,
+      ctaLabel: info.ctaLabel,
+      cta: 'height: 56px; display: flex; align-items: center; justify-content: center; border: 2px solid #17130F; border-radius: 12px; box-shadow: 4px 4px 0 #17130F; text-decoration: none; font-weight: 700; font-size: 16px; background: ' + tone.bg + '; color: ' + tone.fg,
+      size: this.state.size,
+      onSize: (e) => this.setState({ size: e.target.value }),
+      presets: [10, 100, 500].map((n) => ({ label: String(n), pick: () => this.setState({ size: n }) })),
+      payoff,
+      book
+    };
+  }
+}
+</script>
+</body>
+</html>

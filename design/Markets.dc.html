@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quill markets</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFF5E8}
+a{color:#17130F}a:hover{color:#2742F5}
+.qb{transition:transform .12s ease-out,box-shadow .12s ease-out}
+.qb:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 #17130F !important;color:#17130F}
+.qrow{transition:background .12s ease-out}.qrow:hover{background:#FFF0C2}
+@keyframes qFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+@keyframes qBlink{0%,91%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes qPulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes qRowIn{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="min-height: 1040px; background-color: #FFF5E8; background-image: radial-gradient(rgba(23,19,15,0.12) 1px, transparent 1px); background-size: 22px 22px; color: #17130F; font-family: 'DM Sans', system-ui, sans-serif">
+  <dc-import name="AppNav" active="markets" hint-size="100%,98px"></dc-import>
+
+  <main style="max-width: 1280px; margin: 0 auto; padding: 36px 24px 56px; display: flex; flex-direction: column; gap: 26px">
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 44px; letter-spacing: -0.02em; line-height: 1">Markets</h1>
+        <p style="margin: 0; font-size: 16px; color: #5B5047">Pick a price to hedge. Every market is fully collateralized and settles on an attested fixing.</p>
+      </div>
+      <a class="qb" href="Fixing.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; background: #FFFDF8; border: 2px solid #17130F; border-radius: 10px; box-shadow: 3px 3px 0 #17130F; text-decoration: none; font-family: 'IBM Plex Mono', monospace; font-size: 12px">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #137447; animation: qPulse 1.6s ease-in-out infinite"></span>
+        Fixing #000412 · 14:00 UTC
+        <span style="color: #137447; font-weight: 600; border: 1.5px solid #137447; border-radius: 4px; padding: 1px 6px">ATTESTED</span>
+      </a>
+    </div>
+
+    <section aria-label="Summary" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))">
+      <sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
+        <div style="{{s.cell}}">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">{{s.label}}</span>
+          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 30px; line-height: 1.1">{{s.value}}</span>
+          <span style="font-size: 13px; color: #5B5047">{{s.note}}</span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section aria-label="All markets" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; overflow: hidden">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px">
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px">Open markets</h2>
+        <div role="group" aria-label="Filter markets" style="display: flex; gap: 6px">
+          <sc-for list="{{filters}}" as="f" hint-placeholder-count="3">
+            <button type="button" onClick="{{f.pick}}" aria-pressed="{{f.on}}" style="{{f.style}}">{{f.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; min-width: 1020px; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+          <thead>
+            <tr style="text-align: left; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">
+              <th scope="col" style="padding: 10px 20px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">MARKET</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500; text-align: right">INDEX NOW</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">30 DAYS</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">BAND</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">EXPIRES</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500; text-align: right">LONG</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500; text-align: right">SHORT</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500; text-align: right">COLLATERAL</th>
+              <th scope="col" style="padding: 10px 20px 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Action</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+              <tr class="qrow" style="{{r.tr}}">
+                <td style="padding: 14px 20px; white-space: nowrap">
+                  <span style="display: flex; align-items: center; gap: 12px">
+                    <span style="{{r.icon}}">{{r.glyph}}</span>
+                    <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600; font-size: 14px">{{r.sym}}</span><span style="font-family: 'DM Sans', sans-serif; font-size: 12px; color: #5B5047">{{r.desc}}</span></span>
+                  </span>
+                </td>
+                <td style="padding: 14px 12px; text-align: right; white-space: nowrap; font-weight: 600; font-size: 15px">{{r.index}} <span style="font-weight: 400; font-size: 11px; color: #5B5047">{{r.unit}}</span></td>
+                <td style="padding: 14px 12px"><svg viewBox="0 0 120 28" width="120" height="28" role="img" aria-label="{{r.trend}}" style="display: block; overflow: visible"><polyline points="{{r.spark}}" fill="none" stroke="{{r.stroke}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></polyline></svg></td>
+                <td style="padding: 14px 12px; white-space: nowrap">{{r.band}}</td>
+                <td style="padding: 14px 12px; white-space: nowrap">{{r.expiry}} <span style="color: #5B5047">· {{r.left}}</span></td>
+                <td style="padding: 14px 12px; text-align: right; white-space: nowrap; color: #1B2FB8; font-weight: 600">{{r.long}}</td>
+                <td style="padding: 14px 12px; text-align: right; white-space: nowrap; color: #9A2F06; font-weight: 600">{{r.short}}</td>
+                <td style="padding: 14px 12px; text-align: right; white-space: nowrap">{{r.tvl}}</td>
+                <td style="padding: 10px 20px 10px 12px; text-align: right"><a class="qb" href="Trade.dc.html" aria-label="{{r.aria}}" style="display: inline-flex; align-items: center; height: 44px; padding: 0 16px; background: #FFC93C; border: 2px solid #17130F; border-radius: 10px; box-shadow: 3px 3px 0 #17130F; text-decoration: none; color: #17130F; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px">Trade</a></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin: 0; padding: 12px 20px; border-top: 1px solid #E6D9C6; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">LONG and SHORT are quoted in USDC per unit and always add up to cap minus floor. Illustrative testnet data.</p>
+    </section>
+
+    <section aria-label="Get started" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px">
+      <div style="background: #FBE7CF; border: 2px solid #17130F; border-radius: 14px; padding: 22px; display: flex; align-items: center; gap: 20px">
+        <div style="animation: qFloat 4.5s ease-in-out infinite; flex-shrink: 0"><dc-import name="Mascot" pose="stand" size="120" hint-size="120px,79px"></dc-import></div>
+        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start">
+          <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px; line-height: 1.15">You hold no positions yet.</span>
+          <span style="font-size: 14px; line-height: 1.5; color: #4A4038">Mint a pair on H100 with testnet USDC, or buy one side from the book. It takes about two minutes.</span>
+          <a href="Trade.dc.html" style="font-weight: 700; font-size: 14px; padding: 10px 0">Mint your first pair →</a>
+        </div>
+      </div>
+      <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">COLLATERAL FROM ANY CHAIN</span>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px; line-height: 1.15">USDC on Base, Ethereum or Solana? Use it here.</span>
+        <span style="font-size: 14px; line-height: 1.5; color: #5B5047">NEAR Intents routes it to your Quill balance. You never bridge by hand.</span>
+        <a href="Collateral.dc.html" style="font-weight: 700; font-size: 14px; padding: 10px 0">Add collateral →</a>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filter: 'all' };
+  }
+  renderVals() {
+    const cell = (i) => 'padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; ' + (i > 0 ? 'border-left: 1px solid #D9CBB8' : '');
+    const icon = (bg) => 'width: 38px; height: 38px; border: 2px solid #17130F; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 11px; flex-shrink: 0; background: ' + bg;
+    const all = [
+      { kind: 'gpu', sym: 'H100 · 28 NOV', desc: 'NVIDIA H100 rental, per GPU-hour', glyph: 'H100', icon: icon('#E3E8FF'), index: '3.06', unit: 'USD/hr', band: '1.50 – 5.00', expiry: '28 Nov', left: '17 days', long: '1.56', short: '1.94', tvl: '31,500.00 USDC', spark: '0,24 10,22 20,25 30,19 40,20 50,15 60,17 70,12 80,14 90,9 100,11 110,7 120,9', stroke: '#2742F5', trend: 'Rising over 30 days', aria: 'Trade H100 28 November' },
+      { kind: 'gpu', sym: 'H100 · 26 DEC', desc: 'NVIDIA H100 rental, per GPU-hour', glyph: 'H100', icon: icon('#E3E8FF'), index: '3.06', unit: 'USD/hr', band: '1.50 – 5.00', expiry: '26 Dec', left: '45 days', long: '1.61', short: '1.89', tvl: '9,800.00 USDC', spark: '0,24 10,22 20,25 30,19 40,20 50,15 60,17 70,12 80,14 90,9 100,11 110,7 120,9', stroke: '#2742F5', trend: 'Rising over 30 days', aria: 'Trade H100 26 December' },
+      { kind: 'gpu', sym: 'B200 · 28 NOV', desc: 'NVIDIA B200 rental, per GPU-hour', glyph: 'B200', icon: icon('#FFF0C2'), index: '7.02', unit: 'USD/hr', band: '3.50 – 11.00', expiry: '28 Nov', left: '17 days', long: '3.52', short: '3.98', tvl: '4,500.00 USDC', spark: '0,8 10,10 20,7 30,12 40,11 50,15 60,13 70,17 80,16 90,20 100,18 110,21 120,20', stroke: '#B93A0A', trend: 'Falling over 30 days', aria: 'Trade B200 28 November' },
+      { kind: 'inf', sym: 'INF-OUT · 31 DEC', desc: 'NEAR AI Cloud, per 1M output tokens', glyph: 'INF', icon: icon('#DFF3E7'), index: '0.60', unit: 'USD/1M', band: '0.30 – 1.20', expiry: '31 Dec', left: '50 days', long: '0.30', short: '0.60', tvl: '2,500.00 USDC', spark: '0,6 40,6 40,14 85,14 85,22 120,22', stroke: '#137447', trend: 'Two step changes down over 30 days', aria: 'Trade inference price 31 December' }
+    ];
+    const f = this.state.filter;
+    const chip = (on) => 'height: 44px; padding: 0 14px; border-radius: 999px; border: 2px solid #17130F; font-family: \'DM Sans\', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; ' + (on ? 'background: #17130F; color: #FFF5E8' : 'background: #FFFDF8; color: #17130F');
+    return {
+      stats: [
+        { label: 'COLLATERAL LOCKED', value: '48,300.00', note: 'USDC across 4 markets' },
+        { label: 'OPEN PAIRS', value: '13,800', note: 'each backed 100%' },
+        { label: 'NEXT FIXING', value: '15:00 UTC', note: 'hourly, 24h average at expiry' },
+        { label: 'PRICE SOURCES', value: '4 of 4', note: 'reporting in the last hour' }
+      ].map((s, i) => ({ ...s, cell: cell(i) })),
+      filters: [
+        { id: 'all', label: 'All' },
+        { id: 'gpu', label: 'GPU-hours' },
+        { id: 'inf', label: 'Inference' }
+      ].map((c) => ({ ...c, on: c.id === f, pick: () => this.setState({ filter: c.id }), style: chip(c.id === f) })),
+      rows: all.filter((r) => f === 'all' || r.kind === f).map((r, i) => ({ ...r, tr: 'border-top: 1px solid #E6D9C6; animation: qRowIn .45s cubic-bezier(.2,0,0,1) ' + (0.1 + i * 0.09) + 's both' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

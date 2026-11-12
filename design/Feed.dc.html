@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quill price feed</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFF5E8}
+a{color:#17130F}a:hover{color:#2742F5}
+.qrow{transition:background .12s ease-out}.qrow:hover{background:#FFF0C2}
+button:focus-visible,a:focus-visible{outline:3px solid #2742F5;outline-offset:2px}
+@keyframes qPulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes qArrive{from{background:#FFF0C2}to{background:transparent}}
+@keyframes qBlink{0%,91%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="min-height: 1060px; background-color: #FFF5E8; background-image: radial-gradient(rgba(23,19,15,0.12) 1px, transparent 1px); background-size: 22px 22px; color: #17130F; font-family: 'DM Sans', system-ui, sans-serif">
+  <dc-import name="AppNav" active="feed" hint-size="100%,98px"></dc-import>
+
+  <main style="max-width: 1280px; margin: 0 auto; padding: 36px 24px 56px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 44px; letter-spacing: -0.02em; line-height: 1">Buy the price, one <span style="background: #FFC93C; padding: 0 8px; border-radius: 8px">read</span> at a time.</h1>
+      <p style="margin: 0; font-size: 16px; color: #5B5047; max-width: 680px">The attested fixing as a paid API. No account and no key. A request without payment gets a 402 with the price; pay in USDC on NEAR and ask again.</p>
+    </div>
+
+    <section aria-label="How a paid read works" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px">
+      <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; background: #E3E8FF; border: 2px solid #17130F; border-radius: 6px; padding: 2px 7px; width: fit-content">01 · ASK</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">GET /v1/fixing/H100</span>
+        <span style="font-size: 13px; color: #5B5047">Your agent asks for the latest fixing.</span>
+      </div>
+      <div style="background: #FFF0C2; border: 2px solid #17130F; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; background: #FFC93C; border: 2px solid #17130F; border-radius: 6px; padding: 2px 7px; width: fit-content">02 · 402</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">Payment Required · 0.01 USDC</span>
+        <span style="font-size: 13px; color: #4A4038">The reply names the price and where to pay.</span>
+      </div>
+      <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; background: #FFE4D6; border: 2px solid #17130F; border-radius: 6px; padding: 2px 7px; width: fit-content">03 · PAY</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">USDC on NEAR, signed</span>
+        <span style="font-size: 13px; color: #5B5047">A relayer covers gas, so the agent needs only USDC.</span>
+      </div>
+      <div style="background: #DFF3E7; border: 2px solid #17130F; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; background: #46C98A; border: 2px solid #17130F; border-radius: 6px; padding: 2px 7px; width: fit-content">04 · 200</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">value + attestation</span>
+        <span style="font-size: 13px; color: #2F4A3C">The number arrives with the proof it was made in a TEE.</span>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section aria-label="Endpoints and prices" style="flex: 1 1 460px; min-width: 0; background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; overflow: hidden">
+        <h2 style="margin: 0; padding: 16px 20px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px">Endpoints</h2>
+        <div style="overflow-x: auto">
+          <table style="width: 100%; min-width: 440px; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+            <thead>
+              <tr style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047; text-align: left">
+                <th scope="col" style="padding: 10px 20px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">GET</th>
+                <th scope="col" style="padding: 10px 20px 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500; text-align: right">PER READ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{endpoints}}" as="e" hint-placeholder-count="3">
+                <tr class="qrow" style="border-top: 1px solid #E6D9C6">
+                  <th scope="row" style="padding: 14px 20px; text-align: left; font-weight: 600">{{e.path}}<br><span style="font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 13px; color: #5B5047">{{e.what}}</span></th>
+                  <td style="padding: 14px 20px 14px 12px; text-align: right; white-space: nowrap; font-weight: 600; font-size: 15px">{{e.price}} <span style="font-weight: 400; font-size: 11px; color: #5B5047">USDC</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin: 0; padding: 12px 20px; border-top: 1px solid #E6D9C6; font-size: 13px; line-height: 1.5; color: #5B5047">Indexes: H100, B200, INF-OUT. Prices are placeholders for testnet. Reading the latest fixing from the contract itself stays free.</p>
+      </section>
+
+      <section aria-label="Code sample" style="flex: 1 1 520px; min-width: 0; background: #17130F; color: #FFF5E8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 6px 6px 0 #FFC93C; overflow: hidden">
+        <div role="group" aria-label="Choose a language" style="display: flex; border-bottom: 1px solid #3A322B">
+          <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+            <button type="button" onClick="{{t.pick}}" aria-pressed="{{t.on}}" style="{{t.style}}">{{t.label}}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{isCurl}}" hint-placeholder-val="{{true}}">
+          <pre style="margin: 0; padding: 18px 18px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-word"><span style="color: #C9BDB0"># 1. ask</span>
+$ curl -i [YOUR-FEED-URL]/v1/fixing/H100
+<span style="color: #FFC93C">HTTP/1.1 402 Payment Required</span>
+x-payment-required: 0.01 USDC · near
+
+<span style="color: #C9BDB0"># 2. pay and ask again</span>
+$ curl -H "x-payment: $SIGNED_USDC_TRANSFER" \
+    [YOUR-FEED-URL]/v1/fixing/H100
+<span style="color: #7BE0A8">HTTP/1.1 200 OK</span>
+{
+  "id": 412,
+  "index": "H100",
+  "value": "3.06",
+  "unit": "USD/GPU-hr",
+  "at": "2026-11-11T14:00:00Z",
+  "sources": 4,
+  "attestation": "7f3c…a91e",
+  "near_tx": "9Fh2…Lw4s"
+}</pre>
+        </sc-if>
+        <sc-if value="{{isTs}}" hint-placeholder-val="{{false}}">
+          <pre style="margin: 0; padding: 18px 18px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-word"><span style="color: #C9BDB0">// pays the 402 for you, then retries</span>
+import { paidFetch } from "@fastnear/x402";
+
+const res = await paidFetch(
+  "[YOUR-FEED-URL]/v1/fixing/H100",
+  { account, maxPrice: "0.01" }
+);
+const fixing = await res.json();
+
+<span style="color: #C9BDB0">// "3.06", with the proof beside it</span>
+console.log(fixing.value, fixing.attestation);
+
+<span style="color: #FFC93C">// paidFetch is illustrative: check the
+// @fastnear/x402 docs for the real call.</span></pre>
+        </sc-if>
+      </section>
+    </div>
+
+    <section aria-label="Recent paid reads" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; overflow: hidden">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 20px">
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 20px">Recent paid reads</h2>
+        <span style="display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px"><span style="width: 8px; height: 8px; border-radius: 50%; background: #137447; animation: qPulse 1.6s ease-in-out infinite"></span>Live · 0.34 USDC earned today</span>
+      </div>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; min-width: 720px; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+          <thead>
+            <tr style="font-size: 11px; letter-spacing: 0.08em; color: #5B5047; text-align: left">
+              <th scope="col" style="padding: 10px 20px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">TIME · UTC</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">CALLER</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">ENDPOINT</th>
+              <th scope="col" style="padding: 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500; text-align: right">PAID</th>
+              <th scope="col" style="padding: 10px 20px 10px 12px; border-top: 1px solid #D9CBB8; border-bottom: 3px double #17130F; font-weight: 500">RESULT</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{reads}}" as="r" hint-placeholder-count="5">
+              <tr class="qrow" style="{{r.tr}}">
+                <td style="padding: 12px 20px; color: #5B5047; white-space: nowrap">{{r.time}}</td>
+                <td style="padding: 12px 12px; white-space: nowrap">{{r.who}}</td>
+                <td style="padding: 12px 12px; white-space: nowrap">{{r.path}}</td>
+                <td style="padding: 12px 12px; text-align: right; white-space: nowrap; font-weight: 600">{{r.paid}}</td>
+                <td style="padding: 12px 20px 12px 12px; white-space: nowrap"><span style="{{r.badge}}">{{r.result}}</span></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'curl' };
+  }
+  renderVals() {
+    const tab = this.state.tab;
+    const tabStyle = (on) => 'height: 46px; padding: 0 18px; border: 0; border-right: 1px solid #3A322B; font-family: \'IBM Plex Mono\', monospace; font-size: 13px; cursor: pointer; ' + (on ? 'background: #FFC93C; color: #17130F; font-weight: 600' : 'background: transparent; color: #C9BDB0; font-weight: 500');
+    const ok = 'font-size: 11px; font-weight: 600; color: #137447; border: 1.5px solid #137447; border-radius: 4px; padding: 1px 6px';
+    const unpaid = 'font-size: 11px; font-weight: 600; color: #8A5300; border: 1.5px solid #8A5300; border-radius: 4px; padding: 1px 6px';
+    return {
+      isCurl: tab === 'curl',
+      isTs: tab === 'ts',
+      tabs: [
+        { id: 'curl', label: 'curl' },
+        { id: 'ts', label: 'TypeScript' }
+      ].map((t) => ({ ...t, on: t.id === tab, pick: () => this.setState({ tab: t.id }), style: tabStyle(t.id === tab) })),
+      endpoints: [
+        { path: '/v1/fixing/{index}', what: 'Latest attested fixing', price: '0.01' },
+        { path: '/v1/fixing/{index}/history', what: 'Hourly fixings, up to 30 days', price: '0.05' },
+        { path: '/v1/fixing/{index}/proof', what: 'Full attestation bundle and source readings', price: '0.10' }
+      ],
+      reads: [
+        { time: '14:06:41', who: 'hedge-bot.testnet', path: '/v1/fixing/H100', paid: '0.01', result: '200 · PAID', badge: ok },
+        { time: '14:06:40', who: 'hedge-bot.testnet', path: '/v1/fixing/H100', paid: '—', result: '402 · PRICE SENT', badge: unpaid },
+        { time: '14:02:13', who: 'treasury-agent.testnet', path: '/v1/fixing/H100/proof', paid: '0.10', result: '200 · PAID', badge: ok },
+        { time: '14:00:58', who: 'gpu-desk.testnet', path: '/v1/fixing/B200', paid: '0.01', result: '200 · PAID', badge: ok },
+        { time: '13:47:02', who: 'budget-guard.testnet', path: '/v1/fixing/INF-OUT/history', paid: '0.05', result: '200 · PAID', badge: ok }
+      ].map((r, i) => ({ ...r, tr: 'border-top: 1px solid #E6D9C6; ' + (i === 0 ? 'animation: qArrive 1.6s ease-out both' : '') }))
+    };
+  }
+}
+</script>
+</body>
+</html>

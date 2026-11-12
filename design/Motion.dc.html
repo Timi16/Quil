@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quill motion system</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.qb{transition:transform .12s ease-out,box-shadow .12s ease-out}
+.qb:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 #17130F !important}
+.qb:active{transform:translate(3px,3px);box-shadow:0 0 0 #17130F !important}
+button:focus-visible{outline:3px solid #2742F5;outline-offset:2px}
+@keyframes qFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+@keyframes qBlink{0%,91%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes qHop{0%{transform:translateY(-70px) scale(.8);opacity:0}60%{transform:translateY(7px) scale(1.04);opacity:1}80%{transform:translateY(-3px)}100%{transform:none;opacity:1}}
+@keyframes qStamp{0%{transform:rotate(-8deg) scale(1.7);opacity:0}60%{transform:rotate(-8deg) scale(.94);opacity:1}100%{transform:rotate(-8deg) scale(1);opacity:1}}
+@keyframes qRow{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes qDraw{from{stroke-dashoffset:400}to{stroke-dashoffset:0}}
+@keyframes qTape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes qArrive{from{background:#FFC93C}to{background:#FFFDF8}}
+@keyframes qGrow{from{width:0}}
+@keyframes qPulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes qSpin{to{transform:rotate(360deg)}}
+@keyframes qFlow{from{background-position:0 0}to{background-position:24px 0}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="width: 1200px; height: 840px; box-sizing: border-box; padding: 36px 40px; background-color: #FFF5E8; background-image: radial-gradient(rgba(23,19,15,0.12) 1px, transparent 1px); background-size: 22px 22px; color: #17130F; font-family: 'DM Sans', system-ui, sans-serif; display: flex; flex-direction: column; gap: 20px">
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #5B5047">MOTION SYSTEM</span>
+      <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 40px; letter-spacing: -0.02em; line-height: 1">Motion shows a change, or that it's <span style="background: #FFC93C; padding: 0 8px; border-radius: 8px">live.</span></h1>
+      <span style="font-size: 15px; color: #5B5047">Nothing moves for decoration except the hedgehog. Everything stops when the viewer turns motion off.</span>
+    </div>
+    <button class="qb" type="button" onClick="{{replay}}" style="height: 48px; padding: 0 20px; flex-shrink: 0; background: #FFC93C; border: 2px solid #17130F; border-radius: 10px; box-shadow: 3px 3px 0 #17130F; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 15px; color: #17130F; cursor: pointer">Replay all</button>
+  </div>
+
+  <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); font-family: 'IBM Plex Mono', monospace">
+    <sc-for list="{{tokens}}" as="t" hint-placeholder-count="5">
+      <div style="{{t.cell}}">
+        <span style="font-size: 10px; letter-spacing: 0.1em; color: #5B5047">{{t.name}}</span>
+        <span style="font-size: 15px; font-weight: 600">{{t.value}}</span>
+        <span style="font-family: 'DM Sans', sans-serif; font-size: 12px; color: #5B5047">{{t.use}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; flex-grow: 1">
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #FBE7CF; border-bottom: 2px solid #17130F; display: flex; align-items: center; justify-content: center"><div style="animation: qFloat 4.5s ease-in-out infinite"><dc-import name="Mascot" pose="stand" size="118" hint-size="118px,78px"></dc-import></div></div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Float and blink</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">4.5s loop · blink every 5s</span><span style="font-size: 12px; color: #5B5047">The mascot, wherever it sits.</span></div>
+    </div>
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #FBE7CF; border-bottom: 2px solid #17130F; display: flex; align-items: center; justify-content: center"><sc-if value="{{show}}" hint-placeholder-val="{{true}}"><div style="animation: qHop .8s cubic-bezier(.2,0,0,1) .2s both"><dc-import name="Mascot" pose="stand" size="118" hint-size="118px,78px"></dc-import></div></sc-if></div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Hop in</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">800ms · once, after the card</span><span style="font-size: 12px; color: #5B5047">Hero entrance. Wiggles on hover.</span></div>
+    </div>
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #FBE7CF; border-bottom: 2px solid #17130F; display: flex; align-items: center; justify-content: center"><sc-if value="{{show}}" hint-placeholder-val="{{true}}"><span style="padding: 6px 12px; border: 3px solid #137447; border-radius: 8px; color: #137447; background: #FFFDF8; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; animation: qStamp .6s ease-out .5s both">ATTESTED · TEE</span></sc-if></div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Stamp</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">600ms · scale 1.7 → 1</span><span style="font-size: 12px; color: #5B5047">A proof was checked. Never for decoration.</span></div>
+    </div>
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #FBE7CF; border-bottom: 2px solid #17130F; padding: 0 16px; display: flex; flex-direction: column; justify-content: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px">
+        <sc-if value="{{show}}" hint-placeholder-val="{{true}}">
+          <sc-for list="{{slip}}" as="s" hint-placeholder-count="3"><div style="{{s.row}}"><span>{{s.name}}</span><span style="font-weight: 600">{{s.price}}</span></div></sc-for>
+        </sc-if>
+      </div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Slip prints</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">450ms each · 180ms stagger</span><span style="font-size: 12px; color: #5B5047">Sources and receipt lines arrive in order.</span></div>
+    </div>
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #FBE7CF; border-bottom: 2px solid #17130F; display: flex; align-items: center; justify-content: center"><sc-if value="{{show}}" hint-placeholder-val="{{true}}"><svg viewBox="0 0 180 70" width="170" height="66" aria-hidden="true" style="overflow: visible"><polyline points="0,58 18,54 36,57 54,46 72,48 90,36 108,39 126,26 144,29 162,16 180,19" fill="none" stroke="#2742F5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="400" style="animation: qDraw 1.8s ease-out .2s both"></polyline></svg></sc-if></div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Chart draws</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">1.8s · left to right, once</span><span style="font-size: 12px; color: #5B5047">Index lines and sparklines on load.</span></div>
+    </div>
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #FBE7CF; border-bottom: 2px solid #17130F; display: flex; align-items: center; justify-content: center"><button class="qb" type="button" style="height: 48px; padding: 0 20px; background: #FFC93C; border: 2px solid #17130F; border-radius: 10px; box-shadow: 4px 4px 0 #17130F; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 15px; color: #17130F; cursor: pointer">Press me</button></div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Button press</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">120ms · moves into its shadow</span><span style="font-size: 12px; color: #5B5047">Hover 2px, press 3px. Every button.</span></div>
+    </div>
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #17130F; border-bottom: 2px solid #17130F; display: flex; align-items: center; overflow: hidden; white-space: nowrap"><div style="display: inline-flex; gap: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFF5E8; animation: qTape 12s linear infinite"><sc-for list="{{tape}}" as="t" hint-placeholder-count="6"><span><span style="color: #FFC93C; font-weight: 600">{{t.sym}}</span> {{t.val}}</span></sc-for></div></div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Ticker tape</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">36s loop · pauses on hover</span><span style="font-size: 12px; color: #5B5047">Landing page only.</span></div>
+    </div>
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #FBE7CF; border-bottom: 2px solid #17130F; padding: 0 14px; display: flex; flex-direction: column; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px">
+        <sc-if value="{{show}}" hint-placeholder-val="{{true}}"><div style="display: flex; justify-content: space-between; padding: 8px 10px; border: 1.5px solid #17130F; border-bottom: 0; border-radius: 6px 6px 0 0; animation: qArrive 1.6s ease-out .4s both"><span>#000413</span><span style="font-weight: 600">3.08</span></div></sc-if>
+        <div style="display: flex; justify-content: space-between; padding: 8px 10px; border: 1.5px solid #17130F; border-radius: 0 0 6px 6px; background: #FFFDF8"><span>#000412</span><span style="font-weight: 600">3.06</span></div>
+      </div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Row arrives</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">1.6s · sun tint fades out</span><span style="font-size: 12px; color: #5B5047">A new fixing, trade or paid read.</span></div>
+    </div>
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #FBE7CF; border-bottom: 2px solid #17130F; padding: 0 14px; display: flex; align-items: center"><div style="width: 100%; display: flex; height: 40px; border: 2px solid #17130F; border-radius: 8px; overflow: hidden; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600"><sc-if value="{{show}}" hint-placeholder-val="{{true}}"><div style="width: 45%; background: #2742F5; color: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; animation: qGrow 1s cubic-bezier(.2,0,0,1) .3s both">LONG</div></sc-if><div style="flex: 1; background: #F26A2E; display: flex; align-items: center; justify-content: center; border-left: 2px solid #17130F">SHORT</div></div></div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Split grows</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">1s · 180ms while dragging</span><span style="font-size: 12px; color: #5B5047">Payout bars on settle and on the slider.</span></div>
+    </div>
+
+    <div style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 124px; background: #FBE7CF; border-bottom: 2px solid #17130F; display: flex; align-items: center; justify-content: center; gap: 18px">
+        <span style="width: 12px; height: 12px; border-radius: 50%; background: #137447; animation: qPulse 1.6s ease-in-out infinite"></span>
+        <span style="width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 3px solid #E0C79F; border-top-color: #17130F; animation: qSpin 1s linear infinite"></span>
+        <span style="width: 48px; height: 4px; background-image: linear-gradient(90deg, #17130F 50%, transparent 50%); background-size: 12px 4px; animation: qFlow .8s linear infinite"></span>
+      </div>
+      <div style="padding: 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 16px">Live signals</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047">pulse 1.6s · spin 1s · flow .8s</span><span style="font-size: 12px; color: #5B5047">Live feed, waiting, data moving.</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":840}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { show: true };
+  }
+  renderVals() {
+    const cell = (i) => 'padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; ' + (i > 0 ? 'border-left: 1px solid #D9CBB8' : '');
+    const base = [{ sym: 'H100', val: '3.06' }, { sym: 'B200', val: '7.02' }, { sym: 'INF', val: '0.60' }];
+    return {
+      show: this.state.show,
+      replay: () => {
+        this.setState({ show: false });
+        setTimeout(() => this.setState({ show: true }), 60);
+      },
+      tokens: [
+        { name: 'FAST', value: '120ms', use: 'hover, press' },
+        { name: 'BASE', value: '180ms', use: 'tabs, toggles, slider' },
+        { name: 'ENTER', value: '450–900ms', use: 'rise, hop, stamp, rows' },
+        { name: 'LOOP', value: '4.5s · 36s', use: 'float · ticker tape' },
+        { name: 'EASE', value: '(.2, 0, 0, 1)', use: 'cubic-bezier, ease-out only' }
+      ].map((t, i) => ({ ...t, cell: cell(i) })),
+      slip: [
+        { name: 'Akash', price: '2.84' },
+        { name: 'RunPod', price: '2.99' },
+        { name: 'Vast.ai', price: '3.12' }
+      ].map((s, i) => ({ ...s, row: 'display: flex; justify-content: space-between; padding: 5px 0; border-top: 1px dashed #B9AC9C; animation: qRow .45s ease-out ' + (0.3 + i * 0.18) + 's both' })),
+      tape: base.concat(base)
+    };
+  }
+}
+</script>
+</body>
+</html>

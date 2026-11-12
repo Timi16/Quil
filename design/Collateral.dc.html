@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add collateral from any chain</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFF5E8}
+a{color:#17130F}a:hover{color:#2742F5}
+.qb{transition:transform .12s ease-out,box-shadow .12s ease-out}
+.qb:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 #17130F !important}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #2742F5;outline-offset:2px}
+@keyframes qPulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes qSpin{to{transform:rotate(360deg)}}
+@keyframes qBlink{0%,91%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="min-height: 1040px; background-color: #FFF5E8; background-image: radial-gradient(rgba(23,19,15,0.12) 1px, transparent 1px); background-size: 22px 22px; color: #17130F; font-family: 'DM Sans', system-ui, sans-serif">
+  <dc-import name="AppNav" active="none" hint-size="100%,98px"></dc-import>
+
+  <main style="max-width: 1180px; margin: 0 auto; padding: 36px 24px 56px; display: flex; flex-direction: column; gap: 26px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 44px; letter-spacing: -0.02em; line-height: 1">Add collateral from <span style="background: #FFC93C; padding: 0 8px; border-radius: 8px">any chain</span></h1>
+      <p style="margin: 0; font-size: 16px; color: #5B5047; max-width: 640px">Pay with what you already hold. NEAR Intents swaps it and credits USDC to your Quill balance. You never bridge by hand.</p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 26px; align-items: flex-start">
+      <div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+
+        <section aria-label="Amount" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+          <label for="amt" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">01 · YOU WANT TO ADD</label>
+          <div style="display: flex; align-items: center; border: 2px solid #17130F; border-radius: 10px; background: #FFFFFF; height: 64px; overflow: hidden">
+            <input id="amt" type="number" min="1" step="1" inputmode="decimal" value="{{amount}}" onChange="{{onAmount}}" style="flex: 1; min-width: 0; height: 100%; border: 0; padding: 0 16px; font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 600; color: #17130F; background: transparent">
+            <span style="padding: 0 16px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; border-left: 2px solid #17130F; height: 100%; display: flex; align-items: center; background: #FBE7CF">USDC on NEAR</span>
+          </div>
+          <span style="font-size: 13px; color: #5B5047">Enough to mint {{pairs}} H100 pairs at 3.50 USDC each.</span>
+        </section>
+
+        <fieldset style="margin: 0; padding: 0; border: 2px solid #17130F; border-radius: 14px; box-shadow: 5px 5px 0 #17130F; background: #FFFDF8; overflow: hidden">
+          <legend style="float: left; width: 100%; box-sizing: border-box; padding: 16px 20px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">02 · PAY WITH</legend>
+          <div style="clear: both; display: flex; flex-direction: column">
+            <sc-for list="{{tokens}}" as="t" hint-placeholder-count="5">
+              <button type="button" onClick="{{t.pick}}" aria-pressed="{{t.on}}" style="{{t.row}}">
+                <span style="{{t.chip}}">{{t.glyph}}</span>
+                <span style="flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0">
+                  <span style="font-weight: 700; font-size: 15px">{{t.sym}} <span style="font-weight: 500; color: #5B5047">on {{t.chain}}</span></span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5B5047">Wallet balance {{t.bal}}</span>
+                </span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600">{{t.need}}</span>
+                <span style="{{t.radio}}"><span style="{{t.dot}}"></span></span>
+              </button>
+            </sc-for>
+          </div>
+        </fieldset>
+
+        <div style="display: flex; gap: 12px; align-items: flex-start; background: #FFF0C2; border: 2px solid #17130F; border-radius: 12px; padding: 14px 16px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#17130F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 1px"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9L2.4 17.5A2 2 0 004.1 20.5h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"></path></svg>
+          <span style="font-size: 14px; line-height: 1.5"><strong>This step uses real funds.</strong> NEAR Intents runs on mainnet only. Everything else in Quill is testnet, so keep this deposit small.</span>
+        </div>
+      </div>
+
+      <aside style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <section aria-label="Deposit slip" style="background: #FFFDF8; border: 2px solid #17130F; border-radius: 14px; box-shadow: 6px 6px 0 #17130F">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 2px dashed #17130F; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.1em">
+            <span>DEPOSIT SLIP · 03</span>
+            <span style="display: flex; align-items: center; gap: 6px; background: #17130F; color: #FFF5E8; padding: 3px 8px; border-radius: 4px">
+              <span style="width: 7px; height: 7px; border-radius: 50%; background: #FFC93C; animation: qPulse 1.4s ease-in-out infinite"></span>QUOTE LIVE · 0:24
+            </span>
+          </div>
+          <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #5B5047">SEND EXACTLY</span>
+              <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 40px; line-height: 1; letter-spacing: -0.02em">{{sendLine}}</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5B5047">on {{chain}} · exact-output quote</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; background: #FBE7CF; border: 2px solid #17130F; border-radius: 10px; padding: 10px 10px 10px 14px">
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: #5B5047">ONE-TIME DEPOSIT ADDRESS</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; word-break: break-all; line-height: 1.4">0x8c1D47aE02b9F3c661dA9e047B2fC5a813E9d0F7</span>
+              </span>
+              <button type="button" aria-label="Copy deposit address" style="width: 44px; height: 44px; border: 2px solid #17130F; border-radius: 10px; background: #FFFDF8; color: #17130F; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="2.5"></rect><path d="M15.5 8.5V6a2.5 2.5 0 00-2.5-2.5H6A2.5 2.5 0 003.5 6v7A2.5 2.5 0 006 15.5h2.5"></path></svg>
+              </button>
+            </div>
+            <div style="border-top: 3px double #17130F; display: flex; flex-direction: column; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+              <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #E6D9C6"><span style="color: #5B5047">You receive</span><span style="font-weight: 600">{{receive}} USDC</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #E6D9C6"><span style="color: #5B5047">Intents fee</span><span>0.2%</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0"><span style="color: #5B5047">If it fails, refund to</span><span>0x4f2a…91bE</span></div>
+            </div>
+          </div>
+          <ol aria-label="Progress" style="list-style: none; margin: 0; padding: 14px 20px 18px; background: #FBE7CF; border-top: 2px solid #17130F; border-radius: 0 0 12px 12px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+            <li style="display: flex; align-items: center; gap: 10px"><span style="width: 20px; height: 20px; box-sizing: border-box; border-radius: 50%; border: 3px solid #E0C79F; border-top-color: #17130F; animation: qSpin 1s linear infinite; flex-shrink: 0"></span><strong>Waiting for your deposit</strong></li>
+            <li style="display: flex; align-items: center; gap: 10px; color: #5B5047"><span style="width: 20px; height: 20px; box-sizing: border-box; border-radius: 50%; border: 2px solid #5B5047; flex-shrink: 0"></span>Swapped by NEAR Intents</li>
+            <li style="display: flex; align-items: center; gap: 10px; color: #5B5047"><span style="width: 20px; height: 20px; box-sizing: border-box; border-radius: 50%; border: 2px solid #5B5047; flex-shrink: 0"></span>Credited to your Quill balance</li>
+          </ol>
+        </section>
+        <a class="qb" href="Trade.dc.html" style="height: 56px; display: flex; align-items: center; justify-content: center; background: #FFC93C; border: 2px solid #17130F; border-radius: 12px; box-shadow: 4px 4px 0 #17130F; text-decoration: none; color: #17130F; font-weight: 700; font-size: 16px">I've sent it</a>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5B5047; text-align: center">Routed by NEAR Intents · 1Click</span>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: 'usdc-base', amount: 350 };
+  }
+  renderVals() {
+    const amount = Math.max(0, Number(this.state.amount) || 0);
+    const chip = (bg, fg) => 'width: 40px; height: 40px; border: 2px solid #17130F; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: \'IBM Plex Mono\', monospace; font-size: 11px; font-weight: 600; flex-shrink: 0; background: ' + bg + '; color: ' + fg;
+    const defs = [
+      { id: 'usdc-base', sym: 'USDC', chain: 'Base', glyph: 'USDC', bal: '1,204.50', rate: 1.002, dp: 2, chip: chip('#E3E8FF', '#17130F') },
+      { id: 'usdc-eth', sym: 'USDC', chain: 'Ethereum', glyph: 'USDC', bal: '380.00', rate: 1.004, dp: 2, chip: chip('#E3E8FF', '#17130F') },
+      { id: 'usdc-sol', sym: 'USDC', chain: 'Solana', glyph: 'USDC', bal: '96.10', rate: 1.002, dp: 2, chip: chip('#E3E8FF', '#17130F') },
+      { id: 'eth-arb', sym: 'ETH', chain: 'Arbitrum', glyph: 'ETH', bal: '0.4120', rate: 1 / 3200, dp: 5, chip: chip('#FFF0C2', '#17130F') },
+      { id: 'near', sym: 'NEAR', chain: 'NEAR', glyph: 'NEAR', bal: '212.00', rate: 1 / 3, dp: 2, chip: chip('#DFF3E7', '#17130F') }
+    ];
+    const need = (t) => (amount * t.rate).toFixed(t.dp) + ' ' + t.sym;
+    const cur = defs.find((t) => t.id === this.state.sel) || defs[0];
+    return {
+      amount: this.state.amount,
+      onAmount: (e) => this.setState({ amount: e.target.value }),
+      pairs: Math.floor(amount / 3.5),
+      receive: amount.toFixed(2),
+      sendLine: need(cur),
+      chain: cur.chain,
+      tokens: defs.map((t, i) => {
+        const on = t.id === cur.id;
+        return {
+          ...t,
+          on,
+          need: need(t),
+          pick: () => this.setState({ sel: t.id }),
+          row: 'display: flex; align-items: center; gap: 14px; width: 100%; min-height: 64px; padding: 10px 20px; border: 0; border-top: 1px solid #E6D9C6; cursor: pointer; text-align: left; font-family: inherit; color: #17130F; background: ' + (on ? '#FFF0C2' : '#FFFDF8'),
+          radio: 'width: 22px; height: 22px; box-sizing: border-box; border: 2px solid #17130F; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #FFFFFF',
+          dot: 'width: 10px; height: 10px; border-radius: 50%; background: ' + (on ? '#17130F' : 'transparent')
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>
