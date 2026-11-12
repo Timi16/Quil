@@ -36,7 +36,13 @@
     "claim_market_nep245_deployed": "9tD2nuc5EwCmGXh3Dme1r4wcKq6exudU4PyuvyJeXtRp",
     "fixing_oracle_history_deployed": "EcvTCAJVbvts22x4GtWxRSUWhvdEZ1gV5rCRAkbxSvMq",
     "mt_transfer_2_long_to_agent": "5xherJEYw9gyEVH9Gm4kWiuENGmBFxNb8DNjiMUx7425",
-    "agent_pays_feed_0_01_tusdc": "7UQK6j9MwNG3r4Bfz48LfuU7gYYNzYPcSBdEJafpkrMa"
+    "agent_pays_feed_0_01_tusdc": "7UQK6j9MwNG3r4Bfz48LfuU7gYYNzYPcSBdEJafpkrMa",
+    "app_call_mint_2_pairs": "6xpaCMw8WBEb2qvdcSGLiBBxqMiPokcsPFHhSQCQQ5MV",
+    "app_call_send_1_short": "DdjwRqhPQtLGPW53wRMRnbv7C5cpKmLWTHZCsDZ2YmbU",
+    "app_call_redeem_1_pair": "8TdcKkZXxtmeu7vEZBgr5URXzKXn9ThJ8jMZGoad9fPC",
+    "app_call_settle_refused_before_expiry": "6brUaxpwvswDijKsJ25dGvJkJbgTwXt76krFWjowFQPV",
+    "app_call_claim_refused_before_settlement": "CfUx4G82L58dggqGQrp9nZ5x2SoeH5g9vh1aoNWYRQ65",
+    "app_call_feed_payment_with_memo": "9t94DcRUrL2GK7V8tWPAtHbzj6QNdjy2UoRK84dpmkss"
   },
   "oracle_program": {
     "url": "https://github.com/Timi16/Quil/releases/download/oracle-v0.1.0/quill-oracle.wasm",

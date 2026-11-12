@@ -2,10 +2,14 @@
 
 # rustup installs cargo here; make sure every target finds it.
 export PATH := $(HOME)/.cargo/bin:$(PATH)
-.PHONY: test lint fmt check demo demo-live demo-verbose wasm oracle-wasm oracle-live api keeper keeper-once api-testnet testnet-account publish-oracle deploy-oracle
+.PHONY: test app-test lint fmt check demo demo-live demo-verbose wasm oracle-wasm oracle-live api keeper keeper-once api-testnet testnet-account publish-oracle deploy-oracle
 
-test:        ## run every test in the workspace
+test:        ## run every test: the Rust workspace, then the web app (needs Node 20+, skipped without it)
 	cargo test --workspace
+	@$(MAKE) --no-print-directory app-test
+
+app-test:    ## the web app's tests (Node's built-in runner, no dependencies)
+	@if command -v node >/dev/null 2>&1; then node --test app/tests/*.test.mjs; else echo "node not found: skipping the web app's tests"; fi
 
 lint:        ## clippy with warnings as errors
 	cargo clippy --workspace --all-targets -- -D warnings

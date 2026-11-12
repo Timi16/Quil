@@ -40,7 +40,7 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
    make check
    ```
 
-   You see 197 tests pass and clippy report nothing, with warnings treated as errors.
+   You see 225 Rust tests pass, clippy report nothing (warnings are errors), and, if Node 20+ is installed, the web app's 44 tests pass (`make app-test`; Node's built-in runner, no packages to install).
 
 5. **Build the contracts for NEAR.**
 
@@ -117,6 +117,10 @@ Real transactions you can look up on the [testnet explorer](https://testnet.near
 | Oracle request reaching OutLayer and its callback (early spike) | `82p4vXQyg4jK6PRnsL6SLtCpDF7q82TAoLP9mKj1SrPA` |
 | NEP-245 `mt_transfer`: 2 LONG to another account | `5xherJEYw9gyEVH9Gm4kWiuENGmBFxNb8DNjiMUx7425` |
 | An agent pays 0.01 tUSDC for one feed read (the API verified it and served the fixing once) | `7UQK6j9MwNG3r4Bfz48LfuU7gYYNzYPcSBdEJafpkrMa` |
+| The web app's calls, run with its exact arguments: mint 2 pairs (7 tUSDC) | `6xpaCMw8WBEb2qvdcSGLiBBxqMiPokcsPFHhSQCQQ5MV` |
+| … send 1 SHORT | `DdjwRqhPQtLGPW53wRMRnbv7C5cpKmLWTHZCsDZ2YmbU` |
+| … redeem 1 pair: 3.5 tUSDC back | `8TdcKkZXxtmeu7vEZBgr5URXzKXn9ThJ8jMZGoad9fPC` |
+| … settle before expiry: refused with "Market has not expired" | `6brUaxpwvswDijKsJ25dGvJkJbgTwXt76krFWjowFQPV` |
 
 First fixing on-chain (hourly slot 498471, 12 Nov 2026 15:00 UTC), computed in OutLayer's TEE from live data and validated by the contract: H100 **2.643750** (4 sources), B200 **6.985000** (3), inference **1.200000** (NEAR AI). OutLayer charged 0.0014 NEAR for the run.
 
@@ -183,6 +187,7 @@ Not done:
 - **No market to trade LONG or SHORT in.** They are NEP-245 tokens, the standard NEAR Intents uses, but no pool or order book lists them. On testnet, "buying" a side means the holder sends it to you.
 - **Cross-chain collateral is quoted, not yet deposited.** 1Click has no testnet. The API gets real mainnet quotes and deposit addresses, but no real cross-chain deposit has been made, and Quill's contracts are on testnet, so the USDC that arrives on mainnet cannot mint there yet.
 - **The paid feed is HTTP 402 verified against the chain, not the x402 facilitator protocol.** The API checks the payment transaction over RPC. Anyone who sees a payment on-chain before its payer uses it could claim that one read; at 0.01 tUSDC a read, that is the accepted cost of having no signed payload.
+- **The app's wallet flow has not been clicked through end to end.** Every call it signs has run on testnet with its exact method, arguments and deposit (the table above), and every screen has been checked against the live API in a browser, but nobody has yet signed in with MyNearWallet and pressed each button.
 - Not audited.
 
 ## Honest limits of the idea
