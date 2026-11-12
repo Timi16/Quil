@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "crates/quill-core",
+    "contracts/claim-market",
 ]
 
 [workspace.package]

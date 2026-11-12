@@ -1,0 +1,16 @@
+[package]
+name = "claim-market"
+description = "Quill's only custodian: mints fully-collateralized LONG/SHORT claims and pays them out."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = { workspace = true }
+quill-core = { workspace = true }
+
+[dev-dependencies]
+near-sdk = { workspace = true, features = ["unit-testing"] }
