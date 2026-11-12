@@ -1,0 +1,16 @@
+[package]
+name = "fixing-oracle"
+description = "Quill's price oracle: requests hourly fixings from a pinned program in OutLayer's TEE and serves settlement values."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = { workspace = true }
+quill-core = { workspace = true }
+
+[dev-dependencies]
+near-sdk = { workspace = true, features = ["unit-testing"] }
