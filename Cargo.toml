@@ -1,10 +1,12 @@
 [workspace]
+exclude = ["sandbox"]
 resolver = "2"
 members = [
     "crates/quill-core",
     "contracts/claim-market",
     "contracts/fixing-oracle",
     "contracts/mock-usdc",
+    "contracts/mock-outlayer",
     "demo",
     "oracle",
     "services/api",

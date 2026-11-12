@@ -4,7 +4,7 @@ A market for hedging the price of AI compute, on NEAR.
 
 You lock USDC and get two tokens: LONG pays more if the price of a GPU-hour settles high, SHORT pays more if it settles low. Together they are always worth exactly what was locked, so there is no margin and nothing to liquidate. The settlement price is a 24-hour average of hourly fixings computed from public marketplaces by a program whose hash is pinned in the oracle contract.
 
-**Status: hackathon build, 12 Nov 2026.** All three contracts are live on NEAR testnet. The oracle program runs inside OutLayer's TEE and has put real, live prices on-chain (first fixing: H100 $2.64 from 4 sources). `claim-market` has minted, redeemed and refunded with real transactions, and LONG and SHORT are standard NEP-245 tokens that have moved between accounts on testnet. A paid price feed has sold a real read for 0.01 tUSDC, and NEAR Intents (1Click) quotes live cross-chain collateral. No market has settled on testnet yet: market 0 expires on 14 Nov 2026 at 01:00 UTC. The section "What is and isn't done" is exact about that.
+**Status: hackathon build, 12 Nov 2026.** All three contracts are live on NEAR testnet. The oracle program runs inside OutLayer's TEE and has put real, live prices on-chain (first fixing: H100 $2.64 from 4 sources). `claim-market` has minted, redeemed and refunded with real transactions, and LONG and SHORT are standard NEP-245 tokens that have moved between accounts on testnet. A paid price feed has sold a real read for 0.01 tUSDC, and NEAR Intents (1Click) quotes live cross-chain collateral. The full lifecycle (mint, 24 hourly fixings, settle, claim) runs on a local NEAR sandbox node with the same contract builds in one command. On testnet, market 1 settles at 13 Nov 2026 10:00 UTC and market 0 at 14 Nov 01:00 UTC. The section "What is and isn't done" is exact about that.
 
 ## Try it
 
@@ -18,7 +18,15 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
 
    You see 11 numbered steps, each printing `ok` with a figure: Alice locks 350.00 USDC and mints 100 LONG + 100 SHORT on an H100 market with a band of 1.50 to 5.00; she sells the SHORT to Bob; the oracle posts 24 hourly fixings; the market settles at 3.06; Alice claims 156.00 and Bob claims 194.00. It ends with `All checks passed` and the books balanced to the micro-USDC. Along the way it shows a fake token, an early settlement, a duplicate fixing, a garbage oracle answer and a failed USDC transfer all being refused or rolled back. Any wrong number exits non-zero.
 
-2. **See real prices go through it.** Needs internet.
+2. **Run it again on a real NEAR node.** Needs internet once, to download the sandbox node, and `wasm-opt` (binaryen) for `make wasm`.
+
+   ```
+   make sandbox
+   ```
+
+   The contract builds from `deploy/wasm` (the same bytes as on testnet, see `SHA256SUMS`) are deployed to a local NEAR sandbox node: real transactions, receipts, callbacks and gas. Alice mints 100 pairs and sends the SHORT to Bob; the node's clock is fast-forwarded hour by hour while the oracle contract takes 24 fixings through the same request-and-callback path it uses with OutLayer; the market settles at 3.06; Alice claims 156.00 and Bob 194.00, and the contract ends holding nothing. Early settlement, a second fixing in one hour, a second settle and a second claim are all refused by the contracts themselves. The one stand-in is OutLayer, which does not exist on a local node: [`mock-outlayer`](contracts/mock-outlayer/src/lib.rs) answers in its shape. Any wrong figure exits non-zero.
+
+3. **See real prices go through it.** Needs internet.
 
    ```
    make demo-live
@@ -26,7 +34,7 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
 
    Step 0 fetches prices this minute from Vast.ai, Akash, RunPod, Shadeform and NEAR AI Cloud, prints one `src` line per source, then hands the oracle program's exact output to the oracle contract, which validates and stores it. Expect a line like `ok  H100: $2.64 from 4 source(s)`. The figure changes from run to run because the data is live.
 
-3. **Run the oracle program alone.** Needs internet.
+4. **Run the oracle program alone.** Needs internet.
 
    ```
    make oracle-live
@@ -34,15 +42,15 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
 
    You see the evidence lines on stderr and one line of JSON on stdout: the values in micro-USD, how many sources stand behind each, and a SHA-256 of the evidence.
 
-4. **Run the tests and the linter.**
+5. **Run the tests and the linter.**
 
    ```
    make check
    ```
 
-   You see 225 Rust tests pass, clippy report nothing (warnings are errors), and, if Node 20+ is installed, the web app's 44 tests pass (`make app-test`; Node's built-in runner, no packages to install).
+   You see 228 Rust tests pass, clippy report nothing (warnings are errors), and, if Node 20+ is installed, the web app's 44 tests pass (`make app-test`; Node's built-in runner, no packages to install).
 
-5. **Build the contracts for NEAR.**
+6. **Build the contracts for NEAR.**
 
    ```
    rustup target add wasm32-unknown-unknown
@@ -51,7 +59,7 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
 
    You get `claim_market.wasm`, `fixing_oracle.wasm` and `mock_usdc.wasm`, shrunk, in `deploy/wasm/` with a `SHA256SUMS` file. The hashes match the code deployed on testnet (see "Check the deployed code" below).
 
-6. **Build the oracle program for the enclave.**
+7. **Build the oracle program for the enclave.**
 
    ```
    rustup target add wasm32-wasip2
@@ -60,7 +68,7 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
 
    You get `quill-oracle.wasm` and its SHA-256, the hash `fixing-oracle` pins at deployment.
 
-7. **Run the read API.** Needs internet for the live index.
+8. **Run the read API.** Needs internet for the live index.
 
    ```
    make api
@@ -69,7 +77,7 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
 
    You get JSON with the current H100, B200 and inference index values, the evidence line for each source that counted, and a `problems` list naming any source that was down or too thin this minute. `curl localhost:8080/v1/markets` answers `503` with a clear message until the contracts are deployed and `CLAIM_MARKET_ID` and `FIXING_ORACLE_ID` are set.
 
-8. **Use the app and the API against testnet.** Needs internet.
+9. **Use the app and the API against testnet.** Needs internet.
 
    ```
    make api-testnet
@@ -87,7 +95,7 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
 
    The last one answers `402 Payment Required` with the price (0.01 tUSDC), who to pay and how. Pay with one `ft_transfer`, then send the transaction hash in `X-Payment` and your account in `X-Payer`: you get the fixing, the oracle program's hash and a receipt. The same hash a second time is refused.
 
-9. **Price collateral from another chain.** Needs internet. 1Click runs on mainnet only, so this is a dry quote: nothing is sent.
+10. **Price collateral from another chain.** Needs internet. 1Click runs on mainnet only, so this is a dry quote: nothing is sent.
 
    ```
    curl -X POST localhost:8080/v1/collateral/quote -H 'content-type: application/json' -d '{
@@ -102,7 +110,7 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
 
 | Contract | Account | State |
 |---|---|---|
-| `claim-market` | `market.quill-1112-f33adb.testnet` | Live. LONG and SHORT are NEP-245 tokens `0:L` and `0:S`. Market 0: H100, band 1.50 to 5.00, expires 14 Nov 2026 01:00 UTC |
+| `claim-market` | `market.quill-1112-f33adb.testnet` | Live. LONG and SHORT are NEP-245 tokens `0:L` and `0:S`. Market 0: H100, band 1.50 to 5.00, expires 14 Nov 2026 01:00 UTC. Market 1: same band, expires 13 Nov 2026 10:00 UTC |
 | test USDC (`mock-usdc`) | `usdc.quill-1112-f33adb.testnet` | Live. 6 decimals, open faucet, no value |
 | `fixing-oracle` | `oracle.quill-1112-f33adb.testnet` | Live, with a week of history readable through `fixings_between`. Pinned to [`quill-oracle.wasm`](https://github.com/Timi16/Quil/releases/tag/oracle-v0.1.0), SHA-256 `c163a26f…0d54ab6`. A keeper requests a fixing every hour |
 
@@ -145,6 +153,8 @@ curl localhost:8080/v1/portfolio/quill-1112-f33adb.testnet
 | `quill-demo` | [demo](demo/src/lib.rs) | Both contracts and a mock USDC ledger in one process. |
 | `quill-keeper` | [services/keeper](services/keeper/src/lib.rs) | Asks for each hour's fixing and settles expired markets. It has no privileges: both calls are public, so anyone can run one. |
 | `mock-usdc` | [contracts/mock-usdc](contracts/mock-usdc/src/lib.rs) | Test only. A standard NEP-141 token with 6 decimals and a faucet, standing in for USDC on testnet. |
+| `mock-outlayer` | [contracts/mock-outlayer](contracts/mock-outlayer/src/lib.rs) | Test only. Answers `request_execution` the way OutLayer does, so the real oracle contract can run on a local sandbox node. Never deployed to testnet. |
+| `quill-sandbox` | [sandbox](sandbox/src/main.rs) | Runs the whole lifecycle on a local NEAR node with the contract builds from `deploy/wasm` (`make sandbox`). |
 | `quill-api` | [services/api](services/api/src/lib.rs) | HTTP API and web server. Reads markets, fixings and portfolios from the contracts; sells the latest fixing per read for tUSDC ([feed.rs](services/api/src/feed.rs)); relays NEAR Intents quotes for collateral ([intents.rs](services/api/src/intents.rs)). Holds no keys and signs nothing. |
 | web app | [app](app/) | Static HTML, CSS and JavaScript, no build step. Every transaction is signed in the user's own wallet. |
 
@@ -179,11 +189,11 @@ Done and run from this repository: all contracts with their tests, the oracle pr
 
 Not done:
 
-- **No market has settled on testnet yet.** Market 0 expires on 14 Nov 2026 at 01:00 UTC and needs 18 hourly fixings in its final 24 hours; the keeper is collecting them. Settlement is otherwise proven in the offline demo and tests.
+- **No market has settled on testnet yet.** A market settles on the mean of the hourly fixings in its last 24 hours and needs at least 18 of them; fixings began on 12 Nov at 15:00 UTC and cannot be backfilled. Market 1 (expiry 13 Nov 10:00 UTC) is the earliest that can settle; market 0 follows on 14 Nov 01:00 UTC. The keeper is collecting the fixings. Settlement and claims are proven meanwhile on a NEAR sandbox node (`make sandbox`), in the offline demo and in the tests.
 - **The keeper runs on one laptop.** If it stops, anyone can call `request_fixing` and `settle`, but nobody else is doing so yet.
 - **No attestation is checked on-chain.** OutLayer's callback carries the program's output, not a TDX quote; the root of trust is the OutLayer contract.
 - **`claim-market` and `fixing-oracle` on testnet still have their deploy keys.** The design deletes them so the contracts can never be changed; that is one command per contract and has not been run yet.
-- **The demo is a simulation, not a NEAR sandbox.** Gas and real asynchronous receipts are covered only by the testnet runs above.
+- **In the sandbox run, OutLayer is a stand-in.** Everything after its answer is the real fixing-oracle; the real OutLayer round trip is proven on testnet (table above).
 - **No market to trade LONG or SHORT in.** They are NEP-245 tokens, the standard NEAR Intents uses, but no pool or order book lists them. On testnet, "buying" a side means the holder sends it to you.
 - **Cross-chain collateral is quoted, not yet deposited.** 1Click has no testnet. The API gets real mainnet quotes and deposit addresses, but no real cross-chain deposit has been made, and Quill's contracts are on testnet, so the USDC that arrives on mainnet cannot mint there yet.
 - **The paid feed is HTTP 402 verified against the chain, not the x402 facilitator protocol.** The API checks the payment transaction over RPC. Anyone who sees a payment on-chain before its payer uses it could claim that one read; at 0.01 tUSDC a read, that is the accepted cost of having no signed payload.

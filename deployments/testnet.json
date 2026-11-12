@@ -24,6 +24,15 @@
       "cap": "5.00",
       "expiry_slot": 498505,
       "expires": "2026-11-14T01:00:00Z"
+    },
+    {
+      "id": 1,
+      "index": "H100",
+      "floor": "1.50",
+      "cap": "5.00",
+      "expiry_slot": 498490,
+      "expires": "2026-11-13T10:00:00Z",
+      "note": "earliest expiry the 24-hour window allows given fixings since slot 498471; main holds 10 LONG, agent holds 10 SHORT"
     }
   ],
   "evidence": {
@@ -42,7 +51,10 @@
     "app_call_redeem_1_pair": "8TdcKkZXxtmeu7vEZBgr5URXzKXn9ThJ8jMZGoad9fPC",
     "app_call_settle_refused_before_expiry": "6brUaxpwvswDijKsJ25dGvJkJbgTwXt76krFWjowFQPV",
     "app_call_claim_refused_before_settlement": "CfUx4G82L58dggqGQrp9nZ5x2SoeH5g9vh1aoNWYRQ65",
-    "app_call_feed_payment_with_memo": "9t94DcRUrL2GK7V8tWPAtHbzj6QNdjy2UoRK84dpmkss"
+    "app_call_feed_payment_with_memo": "9t94DcRUrL2GK7V8tWPAtHbzj6QNdjy2UoRK84dpmkss",
+    "market_1_created": "A7VgrwWPPx1YWu5iV8ARnptcBvxUHt6TJKw4LHihVxaS",
+    "market_1_mint_10_pairs": "74a6HaL1frU7uMXwXmpCDxM9WnHEP7pKipSfaL68pvD1",
+    "market_1_short_to_agent": "ELpVDjtUzevuvgEFzEhqoHgAP5E5nvNTEAXqH1Me53fQ"
   },
   "oracle_program": {
     "url": "https://github.com/Timi16/Quil/releases/download/oracle-v0.1.0/quill-oracle.wasm",

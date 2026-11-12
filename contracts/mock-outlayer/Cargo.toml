@@ -1,0 +1,16 @@
+[package]
+name = "mock-outlayer"
+description = "TEST ONLY. Answers request_execution like OutLayer does, so the real fixing-oracle can run in a local NEAR sandbox where OutLayer does not exist."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = { workspace = true }
+
+[dev-dependencies]
+near-sdk = { workspace = true, features = ["unit-testing"] }

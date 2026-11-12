@@ -2,7 +2,7 @@
 
 # rustup installs cargo here; make sure every target finds it.
 export PATH := $(HOME)/.cargo/bin:$(PATH)
-.PHONY: test app-test lint fmt check demo demo-live demo-verbose wasm oracle-wasm oracle-live api keeper keeper-once api-testnet testnet-account publish-oracle deploy-oracle
+.PHONY: test app-test sandbox lint fmt check demo demo-live demo-verbose wasm oracle-wasm oracle-live api keeper keeper-once api-testnet testnet-account publish-oracle deploy-oracle
 
 test:        ## run every test: the Rust workspace, then the web app (needs Node 20+, skipped without it)
 	cargo test --workspace
@@ -18,6 +18,9 @@ fmt:         ## format everything
 	cargo fmt --all
 
 check: fmt lint test   ## what CI runs
+
+sandbox: wasm ## the whole lifecycle on a local NEAR node with the real contract builds: mint, 24 hourly fixings, settle, claim (first run downloads the node)
+	cargo run --quiet --manifest-path sandbox/Cargo.toml
 
 demo:        ## the whole story, end to end, in-process and offline (contract event logs hidden)
 	cargo run --quiet -p quill-demo 2>/dev/null || (echo 'demo failed: run make demo-verbose' && exit 1)
