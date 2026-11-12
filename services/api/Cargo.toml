@@ -1,0 +1,17 @@
+[package]
+name = "quill-api"
+description = "Quill's read API: live index prices from the sources, and markets, fixings and portfolios read from the contracts."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+quill-core = { workspace = true }
+quill-oracle = { path = "../../oracle" }
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = { version = "2", features = ["json"] }
+base64 = "0.22"
