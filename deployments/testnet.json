@@ -5,13 +5,15 @@
     "deployer_and_keeper": "quill-1112-f33adb.testnet",
     "claim_market": "market.quill-1112-f33adb.testnet",
     "fixing_oracle": "oracle.quill-1112-f33adb.testnet",
-    "test_usdc": "usdc.quill-1112-f33adb.testnet"
+    "test_usdc": "usdc.quill-1112-f33adb.testnet",
+    "test_agent": "agent.quill-1112-f33adb.testnet"
   },
   "status": {
-    "claim_market": "deployed; initialised with usdc = usdc.quill-1112-f33adb.testnet and oracle = oracle.quill-1112-f33adb.testnet; full-access key still present (to be deleted after the oracle goes live)",
+    "claim_market": "deployed with NEP-245 LONG/SHORT tokens (token ids \"<market>:L\" / \"<market>:S\"); redeployed 2026-11-12 with state kept; full-access key still present (to be deleted after market 0 settles)",
     "test_usdc": "deployed; NEP-141, 6 decimals, open faucet; test only",
-    "fixing_oracle": "deployed; pinned to https://github.com/Timi16/Quil/releases/download/oracle-v0.1.0/quill-oracle.wasm (sha256 c163a26f9867a3afe597de2e8abc21c157f81a9e95737a50509ad262f0d54ab6); indexes H100 (min 3 sources), B200 (min 3), INF_OUT (min 1); full-access key still present",
-    "outlayer": "outlayer.testnet"
+    "fixing_oracle": "deployed; pinned to https://github.com/Timi16/Quil/releases/download/oracle-v0.1.0/quill-oracle.wasm (sha256 c163a26f9867a3afe597de2e8abc21c157f81a9e95737a50509ad262f0d54ab6); indexes H100 (min 3 sources), B200 (min 3), INF_OUT (min 1); history view fixings_between added 2026-11-12 (state kept); full-access key still present",
+    "outlayer": "outlayer.testnet",
+    "paid_feed": "quill-api /v1/feed/{index}: 0.01 tUSDC per read paid to quill-1112-f33adb.testnet, verified over RPC, one read per transaction"
   },
   "code_sha256": "see deploy/wasm/SHA256SUMS",
   "markets": [
@@ -30,7 +32,11 @@
     "redeem_20_pairs": "WBQM9PiW1iEcDuHJfqDXWBMYE4rRaA12u4SV8C6ktca",
     "bad_mint_refunded": "7MfdzazffsSraBkb3CT4LwW4qMQt1x6vBFpMkDQwZ99M",
     "outlayer_runs_quill_oracle_directly": "GuewQhWjpHDTQPojuhHRLHCiiwSFCNjFtQvfuFBxdizY",
-    "oracle_deployed": "77AVxNXF7U3tnmhzBrrLkBsnzSm4We22hAQ6jJpmsUpC"
+    "oracle_deployed": "77AVxNXF7U3tnmhzBrrLkBsnzSm4We22hAQ6jJpmsUpC",
+    "claim_market_nep245_deployed": "9tD2nuc5EwCmGXh3Dme1r4wcKq6exudU4PyuvyJeXtRp",
+    "fixing_oracle_history_deployed": "EcvTCAJVbvts22x4GtWxRSUWhvdEZ1gV5rCRAkbxSvMq",
+    "mt_transfer_2_long_to_agent": "5xherJEYw9gyEVH9Gm4kWiuENGmBFxNb8DNjiMUx7425",
+    "agent_pays_feed_0_01_tusdc": "7UQK6j9MwNG3r4Bfz48LfuU7gYYNzYPcSBdEJafpkrMa"
   },
   "oracle_program": {
     "url": "https://github.com/Timi16/Quil/releases/download/oracle-v0.1.0/quill-oracle.wasm",
@@ -45,5 +51,11 @@
     "INF_OUT": "1.200000 (1 source)",
     "inputs": "sha256:42bbff81ca3b168b56b669d1c31624db81129f9b57c29541a89c820e7db869b1",
     "outlayer_cost_near": "0.00142"
+  },
+  "intents_dry_quote": {
+    "checked": "2026-11-12T16:13Z",
+    "request": "5.000000 USDC delivered to a NEAR mainnet account, paid in USDC on Base",
+    "answer": "5.05527 USDC on Base, ~35 s",
+    "note": "1Click is mainnet only; no real deposit made yet"
   }
 }
