@@ -15,7 +15,7 @@ members = [
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/[YOUR-ORG]/quill"
+repository = "https://github.com/Timi16/Quil"
 
 [workspace.dependencies]
 quill-core = { path = "crates/quill-core" }
