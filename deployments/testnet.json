@@ -10,17 +10,40 @@
   "status": {
     "claim_market": "deployed; initialised with usdc = usdc.quill-1112-f33adb.testnet and oracle = oracle.quill-1112-f33adb.testnet; full-access key still present (to be deleted after the oracle goes live)",
     "test_usdc": "deployed; NEP-141, 6 decimals, open faucet; test only",
-    "fixing_oracle": "NOT deployed yet: waits for quill-oracle.wasm to have a public https URL",
+    "fixing_oracle": "deployed; pinned to https://github.com/Timi16/Quil/releases/download/oracle-v0.1.0/quill-oracle.wasm (sha256 c163a26f9867a3afe597de2e8abc21c157f81a9e95737a50509ad262f0d54ab6); indexes H100 (min 3 sources), B200 (min 3), INF_OUT (min 1); full-access key still present",
     "outlayer": "outlayer.testnet"
   },
   "code_sha256": "see deploy/wasm/SHA256SUMS",
   "markets": [
-    { "id": 0, "index": "H100", "floor": "1.50", "cap": "5.00", "expiry_slot": 498505, "expires": "2026-11-14T01:00:00Z" }
+    {
+      "id": 0,
+      "index": "H100",
+      "floor": "1.50",
+      "cap": "5.00",
+      "expiry_slot": 498505,
+      "expires": "2026-11-14T01:00:00Z"
+    }
   ],
   "evidence": {
     "outlayer_round_trip_spike": "82p4vXQyg4jK6PRnsL6SLtCpDF7q82TAoLP9mKj1SrPA",
     "mint_350_tusdc": "9fBssvtcuMS5KKXXmYtWKcA7cnjteFqu9zAA6mhi2Lg8",
     "redeem_20_pairs": "WBQM9PiW1iEcDuHJfqDXWBMYE4rRaA12u4SV8C6ktca",
-    "bad_mint_refunded": "7MfdzazffsSraBkb3CT4LwW4qMQt1x6vBFpMkDQwZ99M"
+    "bad_mint_refunded": "7MfdzazffsSraBkb3CT4LwW4qMQt1x6vBFpMkDQwZ99M",
+    "outlayer_runs_quill_oracle_directly": "GuewQhWjpHDTQPojuhHRLHCiiwSFCNjFtQvfuFBxdizY",
+    "oracle_deployed": "77AVxNXF7U3tnmhzBrrLkBsnzSm4We22hAQ6jJpmsUpC"
+  },
+  "oracle_program": {
+    "url": "https://github.com/Timi16/Quil/releases/download/oracle-v0.1.0/quill-oracle.wasm",
+    "sha256": "c163a26f9867a3afe597de2e8abc21c157f81a9e95737a50509ad262f0d54ab6",
+    "build": "make oracle-wasm (wasm32-wasip2); rebuilds to the same hash"
+  },
+  "first_fixing": {
+    "slot": 498471,
+    "at": "2026-11-12T15:00:00Z",
+    "H100": "2.643750 (4 sources)",
+    "B200": "6.985000 (3 sources)",
+    "INF_OUT": "1.200000 (1 source)",
+    "inputs": "sha256:42bbff81ca3b168b56b669d1c31624db81129f9b57c29541a89c820e7db869b1",
+    "outlayer_cost_near": "0.00142"
   }
 }

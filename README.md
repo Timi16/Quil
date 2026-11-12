@@ -4,7 +4,7 @@ A market for hedging the price of AI compute, on NEAR.
 
 You lock USDC and get two tokens: LONG pays more if the price of a GPU-hour settles high, SHORT pays more if it settles low. Together they are always worth exactly what was locked, so there is no margin and nothing to liquidate. The settlement price is a 24-hour average of hourly fixings computed from public marketplaces by a program whose hash is pinned in the oracle contract.
 
-**Status: hackathon build, 12 Nov 2026.** `claim-market` and a test USDC token are live on NEAR testnet and have minted, transferred, redeemed and refunded with real transactions. The oracle contract has completed a real round trip through OutLayer, but the oracle program itself has not yet run inside OutLayer. The section "What is and isn't done" is exact about that.
+**Status: hackathon build, 12 Nov 2026.** All three contracts are live on NEAR testnet. The oracle program runs inside OutLayer's TEE and has put real, live prices on-chain (first fixing: H100 $2.64 from 4 sources). `claim-market` has minted, transferred, redeemed and refunded with real transactions. No market has settled on testnet yet: market 0 expires on 14 Nov 2026 at 01:00 UTC. The section "What is and isn't done" is exact about that.
 
 ## Try it
 
@@ -75,7 +75,7 @@ You need [Rust](https://rustup.rs) (stable). Nothing else: no keys, no accounts,
 |---|---|---|
 | `claim-market` | `market.quill-1112-f33adb.testnet` | Live. Market 0: H100, band 1.50 to 5.00, expires 14 Nov 2026 01:00 UTC |
 | test USDC (`mock-usdc`) | `usdc.quill-1112-f33adb.testnet` | Live. 6 decimals, open faucet, no value |
-| `fixing-oracle` | `oracle.quill-1112-f33adb.testnet` | Not deployed yet: waits for the oracle program to have a public URL |
+| `fixing-oracle` | `oracle.quill-1112-f33adb.testnet` | Live. Pinned to [`quill-oracle.wasm`](https://github.com/Timi16/Quil/releases/tag/oracle-v0.1.0), SHA-256 `c163a26f…0d54ab6`. A keeper requests a fixing every hour |
 
 Real transactions you can open on the [testnet explorer](https://explorer.testnet.near.org):
 
@@ -84,7 +84,12 @@ Real transactions you can open on the [testnet explorer](https://explorer.testne
 | Mint: 350 tUSDC in, 100 LONG + 100 SHORT out | `9fBssvtcuMS5KKXXmYtWKcA7cnjteFqu9zAA6mhi2Lg8` |
 | Redeem 20 pairs: 70 tUSDC paid back | `WBQM9PiW1iEcDuHJfqDXWBMYE4rRaA12u4SV8C6ktca` |
 | Mint with a bad message: refunded in full | `7MfdzazffsSraBkb3CT4LwW4qMQt1x6vBFpMkDQwZ99M` |
-| Oracle request reaching OutLayer and its callback | `82p4vXQyg4jK6PRnsL6SLtCpDF7q82TAoLP9mKj1SrPA` |
+| OutLayer fetching our program, checking its hash and running it in its TEE | `GuewQhWjpHDTQPojuhHRLHCiiwSFCNjFtQvfuFBxdizY` |
+| Oracle request reaching OutLayer and its callback (early spike) | `82p4vXQyg4jK6PRnsL6SLtCpDF7q82TAoLP9mKj1SrPA` |
+
+First fixing on-chain (hourly slot 498471, 12 Nov 2026 15:00 UTC), computed in OutLayer's TEE from live data and validated by the contract: H100 **2.643750** (4 sources), B200 **6.985000** (3), inference **1.200000** (NEAR AI). OutLayer charged 0.0014 NEAR for the run.
+
+Check the program yourself: `make oracle-wasm` rebuilds it to the same SHA-256 the contract pins (`near contract call-function as-read-only oracle.quill-1112-f33adb.testnet code_ref json-args '{}' network-config testnet now`).
 
 Read it through the API:
 
@@ -134,13 +139,14 @@ A GPU index needs three of the four providers. Each provider is one vote however
 
 ## What is and isn't done
 
-Done and run from this repository: all contracts with their tests, the oracle program against live sources, the offline end-to-end demo, the read API and the keeper. On testnet: `claim-market` and the test token are deployed and exercised, and the oracle contract has made a real OutLayer request and handled its callback.
+Done and run from this repository: all contracts with their tests, the oracle program against live sources, the offline end-to-end demo, the read API and the keeper. On testnet: all three contracts are deployed; the oracle program runs in OutLayer and real fixings are on-chain; `claim-market` has been exercised with real transactions; the API reads it all.
 
 Not done:
 
-- **The oracle program has not run inside OutLayer.** OutLayer fetches it from a public https URL, and it has none yet. It compiles for OutLayer's target (`make oracle-wasm`) with HTTP through the WASI host interface.
-- **So no real fixing is on-chain yet, and no market has settled on testnet.** Settlement is proven only in the offline demo and tests.
-- **`claim-market` on testnet still has its deploy key.** The design deletes it so the contract can never be changed; that happens once the oracle is live.
+- **No market has settled on testnet yet.** Market 0 expires on 14 Nov 2026 at 01:00 UTC and needs 18 hourly fixings in its final 24 hours; the keeper is collecting them. Settlement is otherwise proven in the offline demo and tests.
+- **The keeper runs on one laptop.** If it stops, anyone can call `request_fixing` and `settle`, but nobody else is doing so yet.
+- **No attestation is checked on-chain.** OutLayer's callback carries the program's output, not a TDX quote; the root of trust is the OutLayer contract.
+- **`claim-market` and `fixing-oracle` on testnet still have their deploy keys.** The design deletes them so the contracts can never be changed; that is one command per contract and has not been run yet.
 - **The demo is a simulation, not a NEAR sandbox.** Gas and real asynchronous receipts are covered only by the testnet runs above.
 - **LONG and SHORT are balances inside `claim-market`** with a `transfer` method, not NEP-141 tokens, so no exchange can list them yet.
 - **No paid price feed, cross-chain collateral (NEAR Intents) or web app** is in this repository yet.

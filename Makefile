@@ -1,4 +1,7 @@
 # Quill: common tasks. Needs Rust (rustup) on PATH.
+
+# rustup installs cargo here; make sure every target finds it.
+export PATH := $(HOME)/.cargo/bin:$(PATH)
 .PHONY: test lint fmt check demo demo-live demo-verbose wasm oracle-wasm oracle-live api keeper keeper-once api-testnet testnet-account publish-oracle deploy-oracle
 
 test:        ## run every test in the workspace
