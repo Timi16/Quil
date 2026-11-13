@@ -4,3 +4,4 @@ target/
 *.wasm
 .DS_Store
 logs/
+*.mp4

@@ -6,6 +6,8 @@
 //! * `FIXING_DEPOSIT_MILLINEAR`: NEAR attached to each fixing request, in thousandths
 //!   (default 20 = 0.02 NEAR; OutLayer refunds what it does not use to the keeper).
 //! * `TICK_SECS`: seconds between ticks (default 60).
+//! * `NEAR_RPC_URL`: comma-separated RPC endpoints with failover (default FastNEAR,
+//!   then NEAR's own testnet RPC).
 //! * `ONCE=1`: run a single tick and exit.
 
 use std::path::PathBuf;
@@ -81,8 +83,30 @@ fn config() -> Result<Config, String> {
         deposit: NearToken::from_millinear(millinear),
         tick: Duration::from_secs(tick.max(10)),
         once: env("ONCE").as_deref() == Some("1"),
-        network: NetworkConfig::testnet(),
+        network: network(env("NEAR_RPC_URL"))?,
     })
+}
+
+/// Testnet with failover: NEAR_RPC_URL (comma-separated) or FastNEAR then NEAR's own RPC.
+/// A missed hour can never be fixed later, so one flaky endpoint must not cost one.
+fn network(urls: Option<String>) -> Result<NetworkConfig, String> {
+    let urls =
+        urls.unwrap_or_else(|| "https://test.rpc.fastnear.com,https://rpc.testnet.near.org".into());
+    let mut net = NetworkConfig::testnet();
+    net.rpc_endpoints = urls
+        .split(',')
+        .map(str::trim)
+        .filter(|u| !u.is_empty())
+        .map(|u| {
+            u.parse()
+                .map(near_api::RPCEndpoint::new)
+                .map_err(|e| format!("NEAR_RPC_URL `{u}`: {e}"))
+        })
+        .collect::<Result<_, _>>()?;
+    if net.rpc_endpoints.is_empty() {
+        return Err("NEAR_RPC_URL names no endpoint".into());
+    }
+    Ok(net)
 }
 
 fn now() -> u64 {
