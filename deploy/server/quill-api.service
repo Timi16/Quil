@@ -1,0 +1,25 @@
+[Unit]
+Description=Quill API and web app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=quill
+WorkingDirectory=/opt/quill/src
+Environment=PORT=8091
+Environment=CLAIM_MARKET_ID=market.quill-1112-f33adb.testnet
+Environment=FIXING_ORACLE_ID=oracle.quill-1112-f33adb.testnet
+Environment=USDC_ID=usdc.quill-1112-f33adb.testnet
+Environment=FEED_PAYEE=quill-1112-f33adb.testnet
+Environment=APP_DIR=/opt/quill/src/app
+Environment=FEED_LEDGER=/opt/quill/data/feed-payments.txt
+ExecStart=/opt/quill/src/target/release/quill-api
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/quill/data
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+[Unit]
+Description=Quill keeper: requests each hour's fixing and settles expired markets
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=quill
+WorkingDirectory=/opt/quill/src
+Environment=KEEPER_ACCOUNT=keeper.quill-1112-f33adb.testnet
+Environment=KEEPER_KEY_FILE=/opt/quill/.near-credentials/testnet/keeper.quill-1112-f33adb.testnet.json
+Environment=CLAIM_MARKET_ID=market.quill-1112-f33adb.testnet
+Environment=FIXING_ORACLE_ID=oracle.quill-1112-f33adb.testnet
+ExecStart=/opt/quill/src/target/release/quill-keeper
+Restart=always
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

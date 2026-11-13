@@ -1,0 +1,6 @@
+# Added to the server's /etc/caddy/Caddyfile. Caddy fetches the certificates.
+# quil. serves the web app and its API; api. serves the same API for agents and curl.
+quil.timilehin-olowu.xyz, api.timilehin-olowu.xyz {
+	encode gzip zstd
+	reverse_proxy 127.0.0.1:8091
+}

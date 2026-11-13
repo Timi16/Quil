@@ -2,6 +2,8 @@
 
 A market for hedging the price of AI compute, on NEAR.
 
+**Live:** the app at **https://quil.timilehin-olowu.xyz** and the API at **https://api.timilehin-olowu.xyz** (try `curl -i https://api.timilehin-olowu.xyz/v1/feed/H100`), on NEAR testnet. A keeper on the same server takes every hourly fixing. How it is deployed: [deploy/server](deploy/server/README.md).
+
 You lock USDC and get two tokens: LONG pays more if the price of a GPU-hour settles high, SHORT pays more if it settles low. Together they are always worth exactly what was locked, so there is no margin and nothing to liquidate. The settlement price is a 24-hour average of hourly fixings computed from public marketplaces by a program whose hash is pinned in the oracle contract.
 
 **Status: hackathon build, 12 Nov 2026.** All three contracts are live on NEAR testnet. The oracle program runs inside OutLayer's TEE and has put real, live prices on-chain (first fixing: H100 $2.64 from 4 sources). `claim-market` has minted, redeemed and refunded with real transactions, and LONG and SHORT are standard NEP-245 tokens that have moved between accounts on testnet. A paid price feed has sold a real read for 0.01 tUSDC, and NEAR Intents (1Click) quotes live cross-chain collateral. The full lifecycle (mint, 24 hourly fixings, settle, claim) runs on a local NEAR sandbox node with the same contract builds in one command. On testnet, market 1 settles at 13 Nov 2026 10:00 UTC and market 0 at 14 Nov 01:00 UTC. The section "What is and isn't done" is exact about that.
@@ -190,7 +192,7 @@ Done and run from this repository: all contracts with their tests, the oracle pr
 Not done:
 
 - **No market has settled on testnet yet.** A market settles on the mean of the hourly fixings in its last 24 hours and needs at least 18 of them; fixings began on 12 Nov at 15:00 UTC and cannot be backfilled. Market 1 (expiry 13 Nov 10:00 UTC) is the earliest that can settle; market 0 follows on 14 Nov 01:00 UTC. The keeper is collecting the fixings. Settlement and claims are proven meanwhile on a NEAR sandbox node (`make sandbox`), in the offline demo and in the tests.
-- **The keeper runs on one laptop.** If it stops, anyone can call `request_fixing` and `settle`, but nobody else is doing so yet.
+- **One keeper, on one server.** It runs under systemd with RPC failover and retries, as its own account with a little test NEAR. Hours it missed while it still ran on a laptop (12 and 13 Nov) are gone for good; that is why market 1 settles a few hours after its 10:00 UTC expiry. If it stops, anyone can call `request_fixing` and `settle`.
 - **No attestation is checked on-chain.** OutLayer's callback carries the program's output, not a TDX quote; the root of trust is the OutLayer contract.
 - **`claim-market` and `fixing-oracle` on testnet still have their deploy keys.** The design deletes them so the contracts can never be changed; that is one command per contract and has not been run yet.
 - **In the sandbox run, OutLayer is a stand-in.** Everything after its answer is the real fixing-oracle; the real OutLayer round trip is proven on testnet (table above).

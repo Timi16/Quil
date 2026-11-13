@@ -6,7 +6,8 @@
     "claim_market": "market.quill-1112-f33adb.testnet",
     "fixing_oracle": "oracle.quill-1112-f33adb.testnet",
     "test_usdc": "usdc.quill-1112-f33adb.testnet",
-    "test_agent": "agent.quill-1112-f33adb.testnet"
+    "test_agent": "agent.quill-1112-f33adb.testnet",
+    "keeper": "keeper.quill-1112-f33adb.testnet"
   },
   "status": {
     "claim_market": "deployed with NEP-245 LONG/SHORT tokens (token ids \"<market>:L\" / \"<market>:S\"); redeployed 2026-11-12 with state kept; full-access key still present (to be deleted after market 0 settles)",
@@ -54,7 +55,8 @@
     "app_call_feed_payment_with_memo": "9t94DcRUrL2GK7V8tWPAtHbzj6QNdjy2UoRK84dpmkss",
     "market_1_created": "A7VgrwWPPx1YWu5iV8ARnptcBvxUHt6TJKw4LHihVxaS",
     "market_1_mint_10_pairs": "74a6HaL1frU7uMXwXmpCDxM9WnHEP7pKipSfaL68pvD1",
-    "market_1_short_to_agent": "ELpVDjtUzevuvgEFzEhqoHgAP5E5nvNTEAXqH1Me53fQ"
+    "market_1_short_to_agent": "ELpVDjtUzevuvgEFzEhqoHgAP5E5nvNTEAXqH1Me53fQ",
+    "keeper_account_created": "8mwKW9cvvGw7yHVT7H1Cuxs2HVRLT2Hw7DkDbiWDaxMT"
   },
   "oracle_program": {
     "url": "https://github.com/Timi16/Quil/releases/download/oracle-v0.1.0/quill-oracle.wasm",
@@ -75,5 +77,11 @@
     "request": "5.000000 USDC delivered to a NEAR mainnet account, paid in USDC on Base",
     "answer": "5.05527 USDC on Base, ~35 s",
     "note": "1Click is mainnet only; no real deposit made yet"
+  },
+  "live": {
+    "app": "https://quil.timilehin-olowu.xyz",
+    "api": "https://api.timilehin-olowu.xyz",
+    "server": "Ubuntu VPS, systemd units in deploy/server",
+    "keeper_since": "2026-11-13T10:00Z"
   }
 }
