@@ -4,6 +4,7 @@ import { api, settle, rpcView } from '../api.js';
 import { html, mount, loading, emptyState, errText, shieldIcon, failState } from '../ui.js';
 import { amt, microText, toMicro, indexLabel, indexMeta, utcFull, utcShort, secsToNextHour, mmss, shortHash, deltaText, INDEXES } from '../format.js';
 import { parseEvidence, problemsFor, liveValue, SOURCE_NAMES } from '../data.js';
+import { rolling, rollNumbers } from '../motion.js';
 
 export default async function fixing(ctx) {
   const { root, cfg } = ctx;
@@ -91,7 +92,7 @@ export default async function fixing(ctx) {
         <div style="padding:18px 20px 6px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px">
           <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
             <span class="label">MEDIAN · ${utcFull(f.at)} · ${f.sources} SOURCE${f.sources === 1 ? '' : 'S'}</span>
-            <span class="big big--xl">$${amt(f.value)}<span class="big-unit" style="font-size:14px"> / ${meta.unit.replace('USD / ', '')}</span></span>
+            <span class="big big--xl">${rolling(toMicro(f.value), { key: `fixing-${f.index}` })}<span class="big-unit" style="font-size:14px"> / ${meta.unit.replace('USD / ', '')}</span></span>
           </div>
           ${f.accepted ? html`<span class="stamp stamp--in" style="margin-bottom:8px;font-size:14px;padding:7px 14px">RUN IN TEE · STORED</span>` : html`<span class="stamp stamp--warn stamp--in" style="margin-bottom:8px">FLAGGED · NOT USED</span>`}
         </div>`
@@ -120,6 +121,7 @@ export default async function fixing(ctx) {
         <p class="card-note card-note--body">These rows are read live by the API right now, not taken from the enclave run, so they can differ from the stored fixing. The program can show it read these prices and did this maths; it cannot show a list price is what you would really pay.</p>`;
     }
     mount($('latest'), html`${head}${top}${table}`);
+    rollNumbers($('latest'));
   }
 
   function drawCode(codeR, f) {

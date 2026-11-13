@@ -4,6 +4,7 @@ import { api, settle, rpcView } from '../api.js';
 import { html, mount, mascot, arrowIcon } from '../ui.js';
 import { microText, amt, toMicro, longPerUnit, indexLabel, utcFull, utcDay, utcHour, nextHour, shortHash, deltaText, timeLeft } from '../format.js';
 import { parseEvidence, sparkline, chronological, trendWords } from '../data.js';
+import { pipeline, heroSpike, rolling, rollNumbers } from '../motion.js';
 
 export default async function landing(ctx) {
   const { root, cfg } = ctx;
@@ -37,10 +38,18 @@ export default async function landing(ctx) {
   mount($('how'), howCards(gpuMarket, fix));
   mount($('markets'), marketCards(gpuMarket, infMarket, fix, inf.ok ? inf.value : null, histH.ok ? histH.value : null, histI.ok ? histI.value : null));
   mountSlider($('slider'), gpuMarket, fix);
+  mount($('flow'), pipeline({
+    price: fix ? toMicro(fix.value) : null,
+    sources: fix ? fix.sources : 4,
+    long: gpuMarket && gpuMarket.long_value ? toMicro(gpuMarket.long_value) : null,
+    short: gpuMarket && gpuMarket.short_value ? toMicro(gpuMarket.short_value) : null,
+  }));
+  rollNumbers(root);
 
   const live = await pLive;
   if (!ctx.isCurrent()) return;
   mount($('slip'), slip(fix, live.ok ? live.value : null, code.ok ? code.value : null, live.ok ? 'ok' : 'failed'));
+  rollNumbers(root);
 
   const feed = await pFeed;
   if (!ctx.isCurrent()) return;
@@ -51,6 +60,7 @@ function page() {
   return html`
   <div class="landing">
     <section class="hero">
+      ${heroSpike()}
       <div class="hero-copy">
         <span class="pill rise" data-slot="pill"><span class="live-dot live-dot--sun"></span>Reading the latest fixing…</span>
         <h1 class="hero-title rise rise-1">Hedge the price of compute before it <span class="hero-spike">spikes.</span></h1>
@@ -74,6 +84,13 @@ function page() {
     </section>
 
     <div class="tape" aria-hidden="true" data-slot="tape"></div>
+
+    <section id="pipeline" style="display:flex;flex-direction:column;gap:14px;padding-top:88px">
+      <span class="eyebrow">LIVE PIPELINE</span>
+      <h2 class="sec-title">From GPU listings to a payout.</h2>
+      <p class="sec-lede">Every hour, four marketplaces are read inside an enclave, one price lands on NEAR, and every LONG and SHORT is valued against it. The figures below are live.</p>
+      <div data-slot="flow">${pipeline()}</div>
+    </section>
 
     <section id="how" style="display:flex;flex-direction:column;gap:14px;padding-top:96px">
       <span class="eyebrow">HOW IT WORKS</span>
@@ -170,7 +187,7 @@ function slip(fix, live, code, liveState) {
     <div class="slip-total">
       <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
         <span class="label">LATEST HOURLY FIXING${fix ? ` · ${fix.sources} SOURCES` : ''}</span>
-        <span class="big" style="animation:qMedLoop 9s ease-out .4s infinite both">${fix ? `$${amt(fix.value)}` : '—'}</span>
+        <span class="big" style="animation:qMedLoop 9s ease-out .4s infinite both">${fix ? rolling(toMicro(fix.value), { key: 'slip' }) : '—'}</span>
       </div>
       ${stamp}
     </div>

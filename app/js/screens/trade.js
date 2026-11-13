@@ -5,6 +5,7 @@ import { html, mount, raw, loading, runAction, failState } from '../ui.js';
 import { walletState, signIn, call, ONE_YOCTO } from '../wallet.js';
 import { amt, microText, toMicro, unitsOf, times, indexLabel, indexMeta, utcShort, utcFull, timeLeft, marketName, deltaText, wholeUnits, isAccountId } from '../format.js';
 import { chronological, payoffRows } from '../data.js';
+import { rolling, rollNumbers } from '../motion.js';
 
 const MODES = [
   { id: 'mint', label: 'Mint pair' },
@@ -54,7 +55,7 @@ export default async function trade(ctx) {
           </div>
         </div>
         <div style="display:flex;align-items:baseline;gap:12px">
-          <span class="big">${nowText ? `$${amt(nowText)}` : '—'}</span>
+          <span class="big">${nowText ? rolling(toMicro(nowText), { key: `trade-${m.id}` }) : '—'}</span>
           <span class="mono" style="display:flex;flex-direction:column;gap:2px;font-size:12px">
             <span class="muted">${meta.unit}</span>
             ${change === null ? html`<span class="muted">latest fixing</span>` : html`<span style="font-weight:600;color:${change > 0n ? 'var(--leaf)' : change < 0n ? 'var(--ember-text)' : 'var(--ink-soft)'}">${deltaText(change)} in 48 h</span>`}
@@ -117,6 +118,7 @@ export default async function trade(ctx) {
       </div>
     </div>`);
 
+  rollNumbers(root);
   mountTicket(root.querySelector('[data-slot="ticket"]'), ctx, m, { width, sym, meta });
 }
 

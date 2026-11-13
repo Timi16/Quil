@@ -2,7 +2,21 @@
 
 A market for hedging the price of AI compute, on NEAR.
 
-**Live:** the app at **https://quil.timilehin-olowu.xyz** and the API at **https://api.timilehin-olowu.xyz** (try `curl -i https://api.timilehin-olowu.xyz/v1/feed/H100`), on NEAR testnet. A keeper on the same server takes every hourly fixing. How it is deployed: [deploy/server](deploy/server/README.md).
+![Every hour, four GPU marketplaces are read inside OutLayer's TEE, one price lands on NEAR, and every LONG and SHORT is valued against it](docs/media/pipeline.gif)
+
+**In 20 seconds:**
+- **The price can't be faked.** Every hour, a program whose hash is pinned on-chain runs in an Intel TDX enclave (FastNEAR OutLayer). It takes the median of live H100 prices across Akash, RunPod, Vast.ai and Shadeform and writes it to NEAR.
+- **Nothing to liquidate.** Lock USDC and you get one LONG and one SHORT. Together they always pay out exactly what was locked: no margin, no liquidation bot, no margin bug to drain.
+- **Collateral from any chain** through NEAR Intents, and the same price **sold to AI agents per read** over HTTP 402.
+- **It runs:** live on NEAR testnet with a fixing every hour since 12 Nov 2026. `make sandbox` plays a whole market's life (mint, 24 fixings, settle, claim) on a real local NEAR node in 36 seconds.
+
+| | |
+|---|---|
+| ![The landing page: the live H100 fixing, its four sources and the TEE stamp](docs/media/01-landing.png) **Live price**, read from the chain | ![The fixing screen: four sources, median of medians, the code hash pinned on-chain](docs/media/03-fixing.png) **The price, and the proof**: sources, enclave, pinned hash |
+| ![The trade screen: 48-hour index chart inside the band, payoff table and mint ticket](docs/media/04-trade.png) **Trade**: the band, the payoff and the ticket to mint | ![Collateral from any chain: pick USDC on Base, Ethereum, Arbitrum or Solana](docs/media/05-collateral.png) **Collateral from any chain** via NEAR Intents |
+| ![The paid feed: ask, get a 402 with the price, pay on NEAR, read once](docs/media/06-feed.png) **A paid feed for agents**: 402, pay, read | ![make sandbox output: settled at 3.06, Alice 156.00 + Bob 194.00 = 350.00, all checks passed in 36 s](docs/media/07-sandbox.jpg) **`make sandbox`**: settle and claim on a real NEAR node |
+
+**Live:** the app at **https://quil.timilehin-olowu.xyz** and the API at **https://quil-api.timilehin-olowu.xyz** (try `curl -i https://quil-api.timilehin-olowu.xyz/v1/feed/H100`), on NEAR testnet. A keeper on the same server takes every hourly fixing. How it is deployed: [deploy/server](deploy/server/README.md).
 
 You lock USDC and get two tokens: LONG pays more if the price of a GPU-hour settles high, SHORT pays more if it settles low. Together they are always worth exactly what was locked, so there is no margin and nothing to liquidate. The settlement price is a 24-hour average of hourly fixings computed from public marketplaces by a program whose hash is pinned in the oracle contract.
 

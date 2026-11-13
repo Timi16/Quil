@@ -80,7 +80,7 @@
   },
   "live": {
     "app": "https://quil.timilehin-olowu.xyz",
-    "api": "https://api.timilehin-olowu.xyz",
+    "api": "https://quil-api.timilehin-olowu.xyz",
     "server": "Ubuntu VPS, systemd units in deploy/server",
     "keeper_since": "2026-11-13T10:00Z"
   }

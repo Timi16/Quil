@@ -4,7 +4,7 @@ One small Ubuntu 24.04 VPS runs two systemd services as an unprivileged `quill` 
 
 | Service | What it runs | Unit |
 |---|---|---|
-| `quill-api` | The API and the web app on `127.0.0.1:8091`; Caddy serves it at `https://quil.timilehin-olowu.xyz` and `https://api.timilehin-olowu.xyz` | [quill-api.service](quill-api.service) |
+| `quill-api` | The API and the web app on `127.0.0.1:8091`; Caddy serves it at `https://quil.timilehin-olowu.xyz` and `https://quil-api.timilehin-olowu.xyz` | [quill-api.service](quill-api.service) |
 | `quill-keeper` | Requests each hour's fixing and settles expired markets | [quill-keeper.service](quill-keeper.service) |
 
 The keeper signs as `keeper.quill-1112-f33adb.testnet`, an account made only for this, holding a little test NEAR. Requesting a fixing and settling are open to anyone, so it needs no privileges and the deployer's key never leaves the developer's machine. Its key file is on the server only (mode 600, owner `quill`), never in git.
